@@ -4,8 +4,6 @@ int coordinateToImageIndex(PImage _image, int _pointX, int _pointY){
 }//end coordinateToImageIndex
 
 // Draw a point 
-  /*
-  int index = 1024;
-  pointX = (index%IMAGE_WIDTH) - IMAGE_WIDTH/2;
-  pointY = (index-CENTER_INDEX)/IMAGE_WIDTH;
-  */
+//int index = 1024;
+//pointX = (index%IMAGE_WIDTH) - IMAGE_WIDTH/2;
+//pointY = (index-CENTER_INDEX)/IMAGE_WIDTH;

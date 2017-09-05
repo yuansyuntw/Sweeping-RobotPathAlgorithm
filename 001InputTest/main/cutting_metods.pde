@@ -12,7 +12,7 @@ boolean rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPo
       if(_image.pixels[coordinateToImageIndex(_image,selectPointX,selectPointY)]!=_color){
         //print("Image[" + selectPointX + "," + selectPointY + "]=" +_image.pixels[coordinateToImageIndex(_image,selectPointX,selectPointX)] + " _color = " + _color + " ");
         result = false;
-        break;
+        return result;
       }
       selectPointX = _LUPointX;
       selectPointX += _width/abs(_width);
@@ -23,20 +23,7 @@ boolean rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPo
   return result;
 }//end rectangleJudgment
 
-boolean cutRectangleJudgment(boolean[] _mapArray, int _width, int _height, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY, color _color){
-  boolean result = true;
-  
-  //Check cut rectangle 
-  int selectPointX = _LUPointX;
-  int selectPointY = _LUPointY;
-  
-  //for(int j=0; j < _width)
-  
-  
-  return result;
-  
-  
-}
+
 
 boolean cutRegionPointJudgment(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LRPointX = _cutSize*_cutPointX - _cutSize/2;
@@ -79,6 +66,20 @@ boolean[] getImageGridArray(PImage _image, int _cutSize,color _color){
   }
   return gridArray;
 }//end getImageGridArray
+
+int getImageGridWidth(PImage _image, int _cutSize){
+  int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
+  int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
+  
+  return (endIndexWidth - startIndexWidth);
+}
+
+int getImageGridHeight(PImage _image, int _cutSize){
+  int startIndexHeight = -1 * (((_image.height/2)-(_cutSize/2))/_cutSize);
+  int endIndexHeight = (((_image.height/2)-(_cutSize/2))/_cutSize);
+  
+  return (endIndexHeight - startIndexHeight);
+}
 
 void findVertex(PImage _image, int _cutSize, boolean[] _cutMap){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);

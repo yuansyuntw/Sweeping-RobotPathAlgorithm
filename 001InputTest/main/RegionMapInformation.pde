@@ -1,5 +1,12 @@
+
 class RegionMapInformation{
- 
+  
+  public class RegionState{
+    public final static int EMITY_OBSTACLE = 0;
+    public final static int MIXED_OBSTACLE = 1;
+    public final static int FULL_OBSTACLE = 2;
+  }
+
   private int LUPointX;
   private int LUPointY;
   private int RDPointX;
@@ -36,22 +43,15 @@ class RegionMapInformation{
   public void setRDRegion(RegionMapInformation _region){ RDRegion = _region;}
   
   //Constructor
-  /*
-  RegionMapInformation(int _state, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY,
-                      RegionMapInformation _LURegion=null,
-                      RegionMapInformation _RURegion=null,
-                      RegionMapInformation _LDRegion=null,
-                      RegionMapInformation _RDRegion=null){
+  
+  RegionMapInformation(int _state, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
     STATE = _state;
     LUPointX = _LUPointX;
     LUPointY = _LUPointY;
     RDPointX = _RDPointX;
     RDPointY = _RDPointY;
-    LURegion = _LURegion;
-    RURegion = _RURegion;
-    RDRegion = _RDRegion;
   }//end constructor
-  */
+  
   
   
 }//end Class

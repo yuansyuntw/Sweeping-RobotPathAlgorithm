@@ -27,9 +27,12 @@ void setup(){
   
   // Cut grid image.
   boolean[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
-  cutGridShow(outputImage, CUT_SIZE,color(50));
+  //cutGridShow(outputImage, CUT_SIZE,color(50));
   
   //findVertex(inputImage, CUT_SIZE, gridArray);
+  int cutWidth = getImageGridWidth(inputImage, CUT_SIZE);
+  int cutHeight = getImageGridHeight(inputImage, CUT_SIZE);
+  octreeCutting(gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth, cutHeight);
   
   
   // drawLine(0,0, pointX, pointY);
@@ -45,58 +48,107 @@ void setup(){
   fill(0,0,255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
-  //outputImage.save(dataPath("area_cleaning2_with_grid.png"));
+  //outputImage.save(dataPath("filter_map.png"));
 }//end setup
 
 
-/*
-RegionMapInformation octreeCutting(boolean[] _mapArray, int _cutSize, int _originalPointX, int _originalPointY, int _width, int _height, color _color){
+
+RegionMapInformation octreeCutting(boolean[] _mapArray, int _cutSize, int _originalPointX, int _originalPointY, int _regionWidth, int _regionHeight){
   
   //Cutting size is small.
-  if(_width/2 < _cutSize || _height/2 < _cutSize){
+  if(_regionWidth/2 <= _cutSize || _regionHeight/2 <= _cutSize){
     return null;
   }
   
-  
   int LURegion_LUPointX = _originalPointX;
   int LURegion_LUPointY = _originalPointY;
-  int LURegion_RDPointX = _originalPointX + _width/2 - 1;
-  int LURegion_RDPointY = _originalPointY + _height/2 - 1;
-  RegionMapInformation _LURegion = getRegion(_mapArray, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
+  int LURegion_RDPointX = _originalPointX + _regionWidth/2 - 1;
+  int LURegion_RDPointY = _originalPointY + _regionHeight/2 - 1;
+  RegionMapInformation _LURegion = getRegionInformation(_mapArray, _regionWidth, _regionHeight,  LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
   
-  int RURegion_LUPointX = _originalPointX + _width/2;
+  int RURegion_LUPointX = _originalPointX + _regionWidth/2;
   int RURegion_LUPointY = _originalPointY;
-  int RURegion_RDPointX = _originalPointX + _width;
-  int RURegion_RDPointY = _originalPointY + _height/2;
-  RegionMapInformation _RURegion = getRegion(_mapArray, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY);
+  int RURegion_RDPointX = _originalPointX + _regionWidth;
+  int RURegion_RDPointY = _originalPointY + _regionHeight/2;
+  RegionMapInformation _RURegion = getRegionInformation(_mapArray, _regionWidth, _regionHeight, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY);
   
   int LDRegion_LUPointX = _originalPointX;
-  int LDRegion_LUPointY = _originalPointY + _height/2;
-  int LDRegion_RDPointX = _originalPointX + _width/2 - 1;
-  int LDRegion_RDPointY = _originalPointY + _height;
-  RegionMapInformation _LDRegion = getRegion(_mapArray, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY);
+  int LDRegion_LUPointY = _originalPointY + _regionHeight/2;
+  int LDRegion_RDPointX = _originalPointX + _regionWidth/2 - 1;
+  int LDRegion_RDPointY = _originalPointY + _regionHeight;
+  RegionMapInformation _LDRegion = getRegionInformation(_mapArray, _regionWidth, _regionHeight, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY);
   
-  int RDRegion_LUPointX = _origionalPointX + _width/2;
-  int RDRegion_LUPointY = _originalPointY + _height/2;
-  int RDRegion_RDPointX = _originalPointX + _width;
-  int RDRegion_RDPointY = _originalPointY + _height;
-  RegionMapInformation _RDRegion = getRegion(_mapArray, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
+  int RDRegion_LUPointX = _originalPointX + _regionWidth/2;
+  int RDRegion_LUPointY = _originalPointY + _regionHeight/2;
+  int RDRegion_RDPointX = _originalPointX + _regionWidth;
+  int RDRegion_RDPointY = _originalPointY + _regionHeight;
+  RegionMapInformation _RDRegion = getRegionInformation(_mapArray, _regionWidth, _regionHeight, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
   
-  RegionMapInformation outputRegion = new RegionMapinformation ();
   
-  return outputRegion;
+  if(_LURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
+      _RURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
+      _LDRegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
+      _RDRegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE){
+        
+    return new RegionMapInformation (RegionMapInformation.RegionState.EMITY_OBSTACLE,
+                                                _originalPointX, _originalPointY,
+                                                 _originalPointX + _regionWidth, _originalPointY + _regionHeight);
+    
+  }else if (_LURegion.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE &&
+      _RURegion.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE &&
+      _LDRegion.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE &&
+      _RDRegion.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE){
+    
+      return new RegionMapInformation (RegionMapInformation.RegionState.FULL_OBSTACLE,
+                                                _originalPointX, _originalPointY,
+                                                 _originalPointX + _regionWidth, _originalPointY + _regionHeight);
+    
+  }else{
+    return new RegionMapInformation (RegionMapInformation.RegionState.MIXED_OBSTACLE,
+                                                _originalPointX, _originalPointY,
+                                                 _originalPointX + _regionWidth, _originalPointY + _regionHeight);
+  }//end if
+  
+  
 }
 
-RegionMapInformation getRegion(boolean _mapArray, int _LRPointX, int _LRPointY, int _RDPointX, int _RDPointY){
+RegionMapInformation getRegionInformation(boolean[] _mapArray, int _regionWidth, int _regionHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
  
-  if(cutRectangleJudgment(_mapArray, _LRPointX, _LRPointY, _RDPointX, _RDPointY)){
+  if(cutRectangleJudgment(_mapArray, _regionWidth, _regionHeight,_LUPointX, _LUPointY, _RDPointX, _RDPointY)){
     //Return emity region 
-    return new RegionMapInformation(0, LURegionLRPointX, LURegionLRPointY, LURegionRDPointX, LURegionRDPointX, LURegionRDPointY);
+    return new RegionMapInformation(RegionMapInformation.RegionState.EMITY_OBSTACLE,
+                                      _LUPointX, _LUPointY,
+                                      _RDPointX, _RDPointY);
   }else{
     //Return Mixed region
-    return new RegionMapInformation(1, LURegionLRPointX, LURegionLRPointY, LURegionRDPointX, LURegionRDPointX, LURegionRDPointY);
+    return new RegionMapInformation(RegionMapInformation.RegionState.MIXED_OBSTACLE,
+                                      _LUPointX, _LUPointY,
+                                      _RDPointX, _RDPointY);
   }
   
 }//end checkRegion
 
-*/
+boolean cutRectangleJudgment(boolean[] _mapArray, int _cutWidth, int _cutHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
+  boolean result = true;
+  
+  //Check cut rectangle 
+  int rectangleWidth = _RDPointX - _LUPointX;
+  int rectangleHeight = _RDPointY - _LUPointY;
+  int selectPointX = _LUPointX + _cutWidth/2;
+  int selectPointY = _LUPointY + _cutHeight/2;
+  int index = selectPointX + selectPointY*_cutWidth;
+  
+  for(int j=0; j<abs(rectangleWidth); j++){
+     for(int i=0; i<abs(rectangleHeight); i++){
+         println("SelectPointX = " + selectPointX + " SelectPointY = " + selectPointY + " index = " + index);
+         if(!_mapArray[index]){
+           result = false;
+           return result;
+         }
+         index += rectangleWidth/abs(rectangleWidth);
+     }
+     index += rectangleHeight/abs(rectangleHeight) * _cutHeight;
+  }//end for
+  
+  return result;
+}
