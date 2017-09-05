@@ -25,8 +25,8 @@ void setup(){
   drawCrossLine(outputImage, 0, 0, color(0,0,255));
   
   // Cut grid image.
-  boolean[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
-  //cutGridShow(outputImage, CUT_SIZE,color(240,240,240,240));
+  //boolean[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
+  cutGridShow(outputImage, CUT_SIZE,color(240,240,240,240));
   
   findVertex(inputImage, CUT_SIZE, gridArray);
   
@@ -49,9 +49,55 @@ void setup(){
 
 
 
-RegionMapInformation OctreeCutting(PImage _image, int _cutSize){
+RegionMapInformation octreeCutting(PImage _image, int _cutSize, int _originalPointX, int _originalPointY, int _width, int _height, color _color){
+  
+  //Cutting size is small.
+  if(_width/2 < _cutSize || _height/2 < _cutSize){
+    return null;
+  }
   
   
+  int LURegion_LUPointX = _originalPointX;
+  int LURegion_LUPointY = _originalPointY;
+  int LURegion_RDPointX = _originalPointX + _width/2 - 1;
+  int LURegion_RDPointY = _originalPointY + _height/2 - 1;
+  RegionMapInformation _LURegion = getRegion(_image, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
+  
+  int RURegion_LUPointX = _originalPointX + _width/2;
+  int RURegion_LUPointY = _originalPointY;
+  int RURegion_RDPointX = _originalPointX + _width;
+  int RURegion_RDPointY = _originalPointY + _height/2;
+  RegionMapInformation _RURegion = getRegion(_image, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY);
+  
+  int LDRegion_LUPointX = _originalPointX;
+  int LDRegion_LUPointY = _originalPointY + _height/2;
+  int LDRegion_RDPointX = _originalPointX + _width/2 - 1;
+  int LDRegion_RDPointY = _originalPointY + _height;
+  RegionMapInformation _LDRegion = getRegion(_image, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY);
+  
+  int RDRegion_LUPointX = _origionalPointX + _width/2;
+  int RDRegion_LUPointY = _originalPointY + _height/2;
+  int RDRegion_RDPointX = _originalPointX + _width;
+  int RDRegion_RDPointY = _originalPointY + _height;
+  RegionMapInformation _RDRegion = getRegion(_image, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
+  
+  
+  
+  
+  
+  RegionMapInformation = new RegionMapinformation ()
   
   return outputRegion
 }
+
+RegionMapInformation getRegion(PImage _image, int _LRPointX, int _LRPointY, int _RDPointX, int _RDPointY){
+ 
+  if(rectangleJudgment(_image, _LRPointX, _LRPointY, _RDPointX, _RDPointY)){
+    //Return emity region 
+    return new RegionMapInformation(0, LURegionLRPointX, LURegionLRPointY, LURegionRDPointX, LURegionRDPointX, LURegionRDPointY);
+  }else{
+    //Return Mixed region
+    return new RegionMapInformation(1, LURegionLRPointX, LURegionLRPointY, LURegionRDPointX, LURegionRDPointX, LURegionRDPointY);
+  }
+  
+}//end checkRegion
