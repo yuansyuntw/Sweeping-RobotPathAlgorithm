@@ -1,12 +1,12 @@
 
-boolean rectangleJudgment(PImage _image, int _LRPointX, int _LRPointY, int _RDPointX, int _RDPointY, color _color){
+boolean rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY, color _color){
   boolean result = true;
-  int _width = _RDPointX - _LRPointX;
-  int _height = _RDPointY - _LRPointY;
+  int _width = _RDPointX - _LUPointX;
+  int _height = _RDPointY - _LUPointY;
   
   // Check rectangle color
-  int selectPointX = _LRPointX;
-  int selectPointY = _LRPointY;
+  int selectPointX = _LUPointX;
+  int selectPointY = _LUPointY;
   for(int j=0 ; j <abs(_height); j++){
     for(int i=0 ; i < abs(_width) ; i++){
       if(_image.pixels[coordinateToImageIndex(_image,selectPointX,selectPointY)]!=_color){
@@ -14,7 +14,7 @@ boolean rectangleJudgment(PImage _image, int _LRPointX, int _LRPointY, int _RDPo
         result = false;
         break;
       }
-      selectPointX = _LRPointX;
+      selectPointX = _LUPointX;
       selectPointX += _width/abs(_width);
     }
     selectPointY += _height/abs(_height);
@@ -22,6 +22,21 @@ boolean rectangleJudgment(PImage _image, int _LRPointX, int _LRPointY, int _RDPo
   
   return result;
 }//end rectangleJudgment
+
+boolean cutRectangleJudgment(boolean[] _mapArray, int _width, int _height, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY, color _color){
+  boolean result = true;
+  
+  //Check cut rectangle 
+  int selectPointX = _LUPointX;
+  int selectPointY = _LUPointY;
+  
+  //for(int j=0; j < _width)
+  
+  
+  return result;
+  
+  
+}
 
 boolean cutRegionPointJudgment(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LRPointX = _cutSize*_cutPointX - _cutSize/2;

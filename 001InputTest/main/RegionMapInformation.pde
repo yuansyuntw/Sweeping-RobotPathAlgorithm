@@ -36,6 +36,7 @@ class RegionMapInformation{
   public void setRDRegion(RegionMapInformation _region){ RDRegion = _region;}
   
   //Constructor
+  /*
   RegionMapInformation(int _state, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY,
                       RegionMapInformation _LURegion=null,
                       RegionMapInformation _RURegion=null,
@@ -50,7 +51,7 @@ class RegionMapInformation{
     RURegion = _RURegion;
     RDRegion = _RDRegion;
   }//end constructor
-  
+  */
   
   
 }//end Class
