@@ -64,3 +64,44 @@ boolean[] getImageGridArray(PImage _image, int _cutSize,color _color){
   }
   return gridArray;
 }//end getImageGridArray
+
+void findVertex(PImage _image, int _cutSize, boolean[] _cutMap){
+  int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
+  int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
+  int startIndexHeight = -1 * (((_image.height/2)-(_cutSize/2))/_cutSize);
+  int endIndexHeight = (((_image.height/2)-(_cutSize/2))/_cutSize);
+  
+  int gridWidth = endIndexWidth - startIndexWidth;
+  int gridHeight = endIndexHeight - startIndexHeight;
+  
+  int[] vertexArray = new int[10240];
+  int index = 0 ;
+  
+  int mapIndex=0;
+  for(int h=0; h< gridHeight; h++){ 
+    for(int w=0;w < gridWidth-1; w++){
+        if((_cutMap[mapIndex] && !_cutMap[mapIndex+1]) || (!_cutMap[mapIndex] && _cutMap[mapIndex+1])){
+          vertexArray[index] = mapIndex;
+          index++;
+        }
+        mapIndex++;
+    }
+  }//end for
+  
+  
+  print("Vertex = ");
+  for(int i=0; i<index; i++){
+    if(vertexArray[i]!=-1){
+      int cuttingX = ((vertexArray[i]%gridWidth) - (gridWidth/2));
+      int cuttingY = ((vertexArray[i]/gridHeight) - (gridHeight/2));
+      
+      drawCuttingRegionPoint(_image, _cutSize, cuttingX, cuttingY, color(0,255,0));
+      
+      if(!_cutMap[vertexArray[i]+gridWidth]){
+        print(vertexArray[i] + " " + cuttingX + " " + cuttingY + ", ");
+        drawCuttingRegionPoint(_image, _cutSize, cuttingX, cuttingY, color(0,0,255));
+      }
+    }
+  }//end for
+  
+}//end findVertex
