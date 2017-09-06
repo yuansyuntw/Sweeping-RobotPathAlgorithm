@@ -55,17 +55,33 @@ void cutGridShow(PImage _image, int _cutSize, color _color){
   println("Width Index = " + startIndexWidth + " ~ " + endIndexWidth);
   println("Height Index = " + startIndexHeight + " ~ " + endIndexHeight);
   
-  int LRPointX ;
-  int LRPointY ;
+  int LUPointX ;
+  int LUPointY ;
+  int RDPointX ;
+  int RDPointY;
   
-  for(int j=startIndexHeight; j<endIndexHeight; j++){
-    LRPointX = _cutSize*0 - _cutSize/2;
-    LRPointY = _cutSize*j - _cutSize/2;
-    drawCrossLine(_image, LRPointX, LRPointY, _color);
+  for(int j=startIndexHeight; j<=endIndexHeight; j++){
+    LUPointX = _cutSize*0 - _cutSize/2;
+    LUPointY = _cutSize*j - _cutSize/2;
+    drawCrossLine(_image, LUPointX, LUPointY, _color);
+
+    // Ｔhe most end.
+    if(j==endIndexHeight){
+      RDPointX = LUPointX + _cutSize;
+      RDPointY = LUPointY + _cutSize; 
+      drawCrossLine(_image, RDPointX, RDPointY, _color);
+    }
   }
-  for(int i=startIndexWidth; i<endIndexWidth; i++){
-    LRPointX = _cutSize*i - _cutSize/2;
-    LRPointY = _cutSize*0 - _cutSize/2;
-    drawCrossLine(_image, LRPointX, LRPointY, _color);
+  for(int i=startIndexWidth; i<=endIndexWidth; i++){
+    LUPointX = _cutSize*i - _cutSize/2;
+    LUPointY = _cutSize*0 - _cutSize/2;
+    drawCrossLine(_image, LUPointX, LUPointY, _color);
+
+    // The most end.
+    if(i==endIndexHeight){
+      RDPointX = LUPointX + _cutSize;
+      RDPointY = LUPointY + _cutSize; 
+      drawCrossLine(_image, RDPointX, RDPointY, _color);
+    }
   }
 }//end cutGridShow

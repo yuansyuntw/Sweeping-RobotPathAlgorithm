@@ -47,13 +47,14 @@ boolean[] getImageGridArray(PImage _image, int _cutSize,color _color){
   //println("Width Index = " + startIndexWidth + " ~ " + endIndexWidth);
   //println("Height Index = " + startIndexHeight + " ~ " + endIndexHeight);
   
-  int gridWidth = endIndexWidth - startIndexWidth;
-  int girdHeight = endIndexHeight - startIndexHeight;
-  boolean[] gridArray = new boolean[gridWidth * girdHeight];
+  int gridWidth = endIndexWidth - startIndexWidth + 1;
+  int gridHeight = endIndexHeight - startIndexHeight + 1;
+  println("gridWidth = " + gridWidth + ", gridHeight = " + gridHeight + ", arraySize = " + (gridWidth + (gridWidth * gridHeight)));
+  boolean[] gridArray = new boolean[gridWidth + (gridWidth * gridHeight)];
   
   int gridIndex = 0;
-  for(int j=startIndexHeight; j<endIndexHeight; j++){
-    for(int i=startIndexWidth; i<endIndexWidth; i++){
+  for(int j=startIndexHeight; j<=endIndexHeight; j++){
+    for(int i=startIndexWidth; i<=endIndexWidth; i++){
       gridArray[gridIndex] = cutRegionPointJudgment(_image, _cutSize, i, j, _color);
       
       //Draw Region Color
@@ -71,14 +72,14 @@ int getImageGridWidth(PImage _image, int _cutSize){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
   int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
   
-  return (endIndexWidth - startIndexWidth);
+  return (endIndexWidth - startIndexWidth + 1);
 }
 
 int getImageGridHeight(PImage _image, int _cutSize){
   int startIndexHeight = -1 * (((_image.height/2)-(_cutSize/2))/_cutSize);
   int endIndexHeight = (((_image.height/2)-(_cutSize/2))/_cutSize);
   
-  return (endIndexHeight - startIndexHeight);
+  return (endIndexHeight - startIndexHeight + 1);
 }
 
 void findVertex(PImage _image, int _cutSize, boolean[] _cutMap){

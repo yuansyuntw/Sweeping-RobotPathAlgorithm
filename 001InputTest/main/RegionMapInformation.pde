@@ -19,7 +19,10 @@ class RegionMapInformation{
   */
   private int STATE;
   
-  //Child Map
+  // Parent Region
+  RegionMapInformation parentRegion;
+  
+  // Child Map
   private RegionMapInformation LURegion = null;
   private RegionMapInformation RURegion = null;
   private RegionMapInformation LDRegion = null;
@@ -41,9 +44,11 @@ class RegionMapInformation{
   public void setRURegion(RegionMapInformation _region){ RURegion = _region;}
   public void setLDRegion(RegionMapInformation _region){ LDRegion = _region;}
   public void setRDRegion(RegionMapInformation _region){ RDRegion = _region;}
+
+  public void setParentRegion(RegionMapInformation _region){ parentRegion = _region; }
+  public RegionMapInformation getParentRegion(){ return parentRegion; }
   
   //Constructor
-  
   RegionMapInformation(int _state, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
     STATE = _state;
     LUPointX = _LUPointX;
