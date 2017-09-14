@@ -7,13 +7,19 @@ void drawCrossLine(PImage _image, int _pointX, int _pointY, color _color){
     _image.pixels[_image.width*(_image.height/2 - 1 + _pointY)+i] = _color;
   }
   _image.updatePixels();
-  image(_image,0 ,0);
+  //image(_image,0 ,0);
 
 }//end draw Point
+
+
+
 
 void drawLine(int _pointX1,int _pointY1, int _pointX2, int _pointY2){
   line(_pointX1+(IMAGE_WIDTH/2), _pointY1+(IMAGE_HEIGHT/2), _pointX2+(IMAGE_WIDTH/2), _pointY2+(IMAGE_HEIGHT/2));
 }
+
+
+
 
 void drawRegion(PImage _image, int _pointX1, int _pointY1, int _pointX2, int _pointY2, color _color){
   int _width = _pointX2 - _pointX1;
@@ -34,8 +40,10 @@ void drawRegion(PImage _image, int _pointX1, int _pointY1, int _pointX2, int _po
   }
   
   _image.updatePixels();
-  image(_image,0 ,0);
+  //image(_image, 0, 0);
 }//end drawRegion
+
+
 
 void drawCuttingRegionPoint(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LRPointX = _cutSize*_cutPointX - _cutSize/2;
@@ -45,6 +53,8 @@ void drawCuttingRegionPoint(PImage _image, int _cutSize, int _cutPointX, int _cu
   
    drawRegion(_image, LRPointX, LRPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingPoint
+
+
 
 void cutGridShow(PImage _image, int _cutSize, color _color){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);

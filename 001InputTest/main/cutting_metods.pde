@@ -4,6 +4,9 @@ boolean rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPo
   int _width = _RDPointX - _LUPointX;
   int _height = _RDPointY - _LUPointY;
   
+  int indexX = _width/abs(_width);
+  int indexY = _height/abs(_height);
+  
   // Check rectangle color
   int selectPointX = _LUPointX;
   int selectPointY = _LUPointY;
@@ -15,9 +18,9 @@ boolean rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPo
         return result;
       }
       selectPointX = _LUPointX;
-      selectPointX += _width/abs(_width);
+      selectPointX += indexX;
     }
-    selectPointY += _height/abs(_height);
+    selectPointY += indexY;
   }//end for
   
   return result;

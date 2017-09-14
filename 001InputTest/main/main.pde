@@ -11,6 +11,8 @@ int CUT_SIZE = 6;
 int CENTER_INDEX = IMAGE_WIDTH * ((IMAGE_HEIGHT/2) - 1) + IMAGE_WIDTH/2;
 int PATH_COLOR = color(254,254,254);
 
+
+
 void setup(){
   size(1024, 1024);
   background(0);
@@ -26,7 +28,7 @@ void setup(){
   boolean[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
   //cutGridShow(outputImage, CUT_SIZE, color(25));
 
-   // Draw a origin points.
+  // Draw a origin points.
   drawCrossLine(outputImage, 0, 0, color(0,0,255));
   
   //findVertex(inputImage, CUT_SIZE, gridArray);
@@ -34,18 +36,21 @@ void setup(){
   int cutHeight = getImageGridHeight(inputImage, CUT_SIZE);
   println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + "\n");
   octreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth, cutHeight, cutWidth, cutHeight);
+  print("\n Octree Cutting End\n");
+  
+  
   
   // drawLine(0,0, pointX, pointY);
   //println(ZPath(0, 0, pointX, pointY, 6));
   
   // Draw start point text
   textSize(30);
-  fill(0,255,0);
+  fill(0, 255, 0);
   //text("StartPoint", 0 +(IMAGE_WIDTH/2) , 0 + (IMAGE_HEIGHT/2));
   
   //Draw end point text
   textSize(30);
-  fill(0,0,255);
+  fill(0, 0, 255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
   //outputImage.save(dataPath("octree_map_001.png"));
@@ -53,10 +58,15 @@ void setup(){
 
 
 
+void draw(){
+  image(outputImage, 0, 0);
+}
+
+
+
 RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, int _cutSize, int _originalPointX, int _originalPointY, int _regionWidth, int _regionHeight, int _gridWidth, int _gridHeight){
   RegionMapInformation resultMap;
   boolean DEBUG = false;
-  color _cornerColor = color(0,255,0);
   
   //Cutting size is small.
   if(_regionWidth/2 <= _cutSize || _regionHeight/2 <= _cutSize){
@@ -74,10 +84,6 @@ RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, int _cutS
   int LURegion_RDPointX = _originalPointX + _regionWidth/2 - 1;
   int LURegion_RDPointY = _originalPointY + _regionHeight/2 - 1;
   RegionMapInformation _LURegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight,  LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
-  if(DEBUG){
-    drawCuttingRegionPoint(_image, CUT_SIZE, LURegion_LUPointX, LURegion_LUPointY, _cornerColor);
-    drawCuttingRegionPoint(_image, CUT_SIZE, LURegion_RDPointX, LURegion_RDPointY, _cornerColor);
-  }
   
   // Explore Right Up Region
   int RURegion_LUPointX = _originalPointX + _regionWidth/2;
@@ -85,10 +91,6 @@ RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, int _cutS
   int RURegion_RDPointX = _originalPointX + _regionWidth - 1;
   int RURegion_RDPointY = _originalPointY + _regionHeight/2 - 1;
   RegionMapInformation _RURegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY);
-  if(DEBUG){
-    drawCuttingRegionPoint(_image, CUT_SIZE, RURegion_LUPointX, RURegion_LUPointY, _cornerColor);
-    drawCuttingRegionPoint(_image, CUT_SIZE, RURegion_RDPointX, RURegion_RDPointY, _cornerColor);
-  }
   
   // Explore Left Down Region
   int LDRegion_LUPointX = _originalPointX;
@@ -96,10 +98,6 @@ RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, int _cutS
   int LDRegion_RDPointX = _originalPointX + _regionWidth/2 - 1;
   int LDRegion_RDPointY = _originalPointY + _regionHeight - 1;
   RegionMapInformation _LDRegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY);
-  if(DEBUG){
-    drawCuttingRegionPoint(_image, CUT_SIZE, LDRegion_LUPointX, LDRegion_LUPointY, _cornerColor);
-    drawCuttingRegionPoint(_image, CUT_SIZE, LDRegion_RDPointX, LDRegion_RDPointY, _cornerColor);
-  }
   
   // Explore Right Down Region
   int RDRegion_LUPointX = _originalPointX + _regionWidth/2;
@@ -107,11 +105,16 @@ RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, int _cutS
   int RDRegion_RDPointX = _originalPointX + _regionWidth - 1;
   int RDRegion_RDPointY = _originalPointY + _regionHeight - 1;
   RegionMapInformation _RDRegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
-  if(DEBUG){
-    drawCuttingRegionPoint(_image, CUT_SIZE, RDRegion_LUPointX, RDRegion_LUPointY, _cornerColor);
-    drawCuttingRegionPoint(_image, CUT_SIZE, RDRegion_RDPointX, RDRegion_RDPointY, _cornerColor);
-  }
-  
+
+  // Draw child region color
+  color emityColor = color(0, 255, 0);
+  color mixColor = color(255, 255, 0);
+  color fullColor = color(128, 128, 128);
+  drawOctreeCuttingArea(_image, CUT_SIZE, _LURegion, emityColor, mixColor, fullColor);
+  drawOctreeCuttingArea(_image, CUT_SIZE, _RURegion, emityColor, mixColor, fullColor);
+  drawOctreeCuttingArea(_image, CUT_SIZE, _LDRegion, emityColor, mixColor, fullColor);
+  drawOctreeCuttingArea(_image, CUT_SIZE, _RDRegion, emityColor, mixColor, fullColor);
+
   // Determine whether the sub-region is empty-obstacle
   if(_LURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
       _RURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
@@ -145,7 +148,9 @@ RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, int _cutS
   resultMap.setRDRegion(octreeCutting(_image, _mapArray, _cutSize, RDRegion_LUPointX, RDRegion_LUPointY, _regionWidth/2, _regionHeight/2, _gridWidth, _gridHeight));
   
   return resultMap;
-}
+}//end octreeCutting
+
+
 
 RegionMapInformation getRegionInformation(boolean[] _mapArray, int _gridWidth, int _gridHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
  
@@ -169,6 +174,8 @@ RegionMapInformation getRegionInformation(boolean[] _mapArray, int _gridWidth, i
   }//end switch
 }//end checkRegion
 
+
+
 int cutRectangleJudgment(boolean[] _mapArray, int _gridWidth, int _gridHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
   boolean emityResult = true;
   boolean fullResult = true;
@@ -191,6 +198,9 @@ int cutRectangleJudgment(boolean[] _mapArray, int _gridWidth, int _gridHeight, i
     print("\n");
   }
   
+  int indexX = rectangleWidth/abs(rectangleWidth);
+  int indexY = rectangleHeight/abs(rectangleHeight);
+  
   for(int j=0; j<=abs(rectangleHeight) + 1; j++){
     for(int i=0; i<abs(rectangleWidth) + 1; i++){
 
@@ -201,7 +211,7 @@ int cutRectangleJudgment(boolean[] _mapArray, int _gridWidth, int _gridHeight, i
       }else if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] ){
         fullResult = false;
       }
-      selectPointX += rectangleWidth/abs(rectangleWidth);
+      selectPointX += indexX;
 
       if(DEBUG){
         if(_mapArray[selectPointX  + (selectPointY * _gridWidth)]){
@@ -214,7 +224,7 @@ int cutRectangleJudgment(boolean[] _mapArray, int _gridWidth, int _gridHeight, i
     if(DEBUG){print("\n");}
     
     selectPointX = (_LUPointX + (_gridWidth/2)) ;
-    selectPointY += rectangleHeight/abs(rectangleHeight);
+    selectPointY += indexY;
   }//end for
   if(DEBUG){print("\n");}
   
@@ -226,9 +236,51 @@ int cutRectangleJudgment(boolean[] _mapArray, int _gridWidth, int _gridHeight, i
     result = RegionMapInformation.RegionState.FULL_OBSTACLE;
     println("Result =  Full Obstacle Region\n");
   }else{
-    result= RegionMapInformation.RegionState.MIXED_OBSTACLE;
+    result = RegionMapInformation.RegionState.MIXED_OBSTACLE;
     println("Result =  Mixed Obstacle Region\n");
   }
   
   return result;
-}
+}//end cutRectangleJudgment
+
+
+
+void drawOctreeCuttingArea(PImage _image, int _cutSize, RegionMapInformation _region, color _emityColor, color _mixColor, color _fullColor){
+
+  color _decisionColor;
+
+  if(_region.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE){
+    _decisionColor = _emityColor;
+  }else if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
+    _decisionColor = _mixColor;
+  }else{
+    _decisionColor = _fullColor;
+  }
+  
+  /*
+  print("drawCuttingRegionPoint LUPoint = (" + _region.getLUPointX() + ", " + _region.getLUPointY() + ") RDPoint = (" + _region.getRDPointX() + ", " + _region.getRDPointY() + ")\n");
+  drawCuttingRegionPoint(_image, _cutSize, _region.getLUPointX(), _region.getLUPointY(), _decisionColor);
+  drawCuttingRegionPoint(_image, _cutSize, _region.getRDPointX(), _region.getRDPointY(), _decisionColor);
+  */
+
+  
+  int width = _region.getRDPointX() - _region.getLUPointX();
+  int height = _region.getRDPointY() - _region.getLUPointY();
+
+  int selectPointX = _region.getLUPointX();
+  int selectPointY = _region.getLUPointY();
+
+  int indexX = width/abs(width);
+  int indexY = height/abs(height);
+
+  for(int j=0; j < abs(height); j++){
+    for(int i=0; i < abs(width); i++){
+      drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
+      selectPointX += indexX;
+    }
+    selectPointX = _region.getLUPointX();
+    selectPointY += indexY;
+  }//end for
+  
+
+}//end drawIctreeCuttingArea

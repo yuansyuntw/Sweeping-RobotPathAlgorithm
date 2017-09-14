@@ -50,18 +50,19 @@ public void setup(){
   int cutHeight = getImageGridHeight(inputImage, CUT_SIZE);
   println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + "\n");
   octreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth, cutHeight, cutWidth, cutHeight);
+  print("\n Octree Cutting End\n");
   
   // drawLine(0,0, pointX, pointY);
   //println(ZPath(0, 0, pointX, pointY, 6));
   
   // Draw start point text
   textSize(30);
-  fill(0,255,0);
+  fill(0, 255, 0);
   //text("StartPoint", 0 +(IMAGE_WIDTH/2) , 0 + (IMAGE_HEIGHT/2));
   
   //Draw end point text
   textSize(30);
-  fill(0,0,255);
+  fill(0, 0, 255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
   //outputImage.save(dataPath("octree_map_001.png"));
@@ -127,6 +128,20 @@ public RegionMapInformation octreeCutting(PImage _image, boolean[] _mapArray, in
     drawCuttingRegionPoint(_image, CUT_SIZE, RDRegion_LUPointX, RDRegion_LUPointY, _cornerColor);
     drawCuttingRegionPoint(_image, CUT_SIZE, RDRegion_RDPointX, RDRegion_RDPointY, _cornerColor);
   }
+
+  // Draw child region color
+  int emityColor = color(0, 255, 0);
+  int mixColor = color(255, 255, 0);
+  int fullColor = color(128, 128, 128);
+
+  drawOctreeCuttingArea(_image, _cutSize, _LURegion, emityColor, mixColor, fullColor);
+  drawOctreeCuttingArea(_image, _cutSize, _RURegion, emityColor, mixColor, fullColor);
+  drawOctreeCuttingArea(_image, _cutSize, _LDRegion, emityColor, mixColor, fullColor);
+  drawOctreeCuttingArea(_image, _cutSize, _RDRegion, emityColor, mixColor, fullColor);
+
+
+
+
   
   // Determine whether the sub-region is empty-obstacle
   if(_LURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
@@ -242,12 +257,44 @@ public int cutRectangleJudgment(boolean[] _mapArray, int _gridWidth, int _gridHe
     result = RegionMapInformation.RegionState.FULL_OBSTACLE;
     println("Result =  Full Obstacle Region\n");
   }else{
-    result= RegionMapInformation.RegionState.MIXED_OBSTACLE;
+    result = RegionMapInformation.RegionState.MIXED_OBSTACLE;
     println("Result =  Mixed Obstacle Region\n");
   }
   
   return result;
 }
+
+public void drawOctreeCuttingArea(PImage _image, int _cutSize, RegionMapInformation _region, int _emityColor, int _mixColor, int _fullColor){
+
+  int _decisionColor;
+
+  if(_region.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE){
+    _decisionColor = _emityColor;
+  }else if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
+    _decisionColor = _mixColor;
+  }else{
+    _decisionColor = _fullColor;
+  }
+
+  int width = _region.getRDPointX() - _region.getLUPointX();
+  int height = _region.getRDPointY() - _region.getLUPointY();
+
+  int selectPointX = _region.getLUPointX();
+  int selectPointY = _region.getLUPointY();
+
+  int indexX = width/abs(width);
+  int indexY = height/abs(height);
+
+  for(int j=0; j < abs(height); j++){
+    for(int i=0; i < abs(width); i++){
+      drawCuttingRegionPoint(_image, _cutSize, selectPointX, selectPointY, _fullColor);
+      selectPointX += indexX;
+    }
+    selectPointX = _region.getLUPointX();
+    selectPointY += indexY;
+  }//end for
+
+}//end drawIctreeCuttingArea
 
 class RegionMapInformation{
   
@@ -470,7 +517,7 @@ public void drawRegion(PImage _image, int _pointX1, int _pointY1, int _pointX2, 
   }
   
   _image.updatePixels();
-  image(_image,0 ,0);
+  image(_image, 0, 0);
 }//end drawRegion
 
 public void drawCuttingRegionPoint(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, int _color){

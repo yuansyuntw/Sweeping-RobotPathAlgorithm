@@ -17,7 +17,7 @@ class RegionMapInformation{
    * 1 = Mixed Obstacle
    * 2 = Full Obstacle
   */
-  private int STATE;
+  private int STATE = RegionState.FULL_OBSTACLE;
   
   // Parent Region
   RegionMapInformation parentRegion;
