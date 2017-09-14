@@ -27,8 +27,10 @@ void drawRegion(PImage _image, int _pointX1, int _pointY1, int _pointX2, int _po
   
   int selectPointX = _pointX1;
   int selectPointY = _pointY1;
+  _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
   
   //print("Region = " + _pointX1 + " " + _pointY1 + " " + _pointX2 + " " + _pointY2 + ", ");
+  
   for(int j=0; j<abs(_height); j++){
     for(int i=0; i<abs(_width); i++){
       //print("Point " + selectPointX + " " + selectPointY + ", ");

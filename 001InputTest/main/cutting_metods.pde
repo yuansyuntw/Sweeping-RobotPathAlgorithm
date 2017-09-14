@@ -62,7 +62,7 @@ boolean[] getImageGridArray(PImage _image, int _cutSize,color _color){
       
       //Draw Region Color
       if(gridArray[gridIndex]){
-        drawCuttingRegionPoint(_image, _cutSize, i, j, color(255,0,0));
+        drawCuttingRegionPoint(_image, _cutSize, i, j, color(255,255,255));
       }
       
       gridIndex += 1;
