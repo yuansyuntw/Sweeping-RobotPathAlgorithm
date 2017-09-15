@@ -37,18 +37,29 @@ void setup(){
   int cutWidth = getImageGridWidth(inputImage, CUT_SIZE);
   int cutHeight = getImageGridHeight(inputImage, CUT_SIZE);
   println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + "\n");
-  RegionMapInformation _root = octreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
-  print("\n Octree Cutting End\n");
+  RegionMapInformation _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
+  print("\n Quadtree Cutting End\n");
   
   // Draw region crosss line
   color crossColor = color(200, 200 ,30);
-  drawOctreeCuttingCrossLine(outputImage, _root, crossColor);
+  //drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor);
+  
+  color emityColor = color(10, 100, 30);
+  color mixColor = color(200, 150, 20);
+  color fullColor = color(128, 128, 128);
+  drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  
+  //print("_rootQuadtree LUPOintX = " + _rootQuadtree.getLUPointX() + " LUPointY = " + _rootQuadtree.getLUPointY());
+  drawCuttingRegionPoint(outputImage, CUT_SIZE, -84, -84, color(255,0,0));
+  drawCuttingRegionPoint(outputImage, CUT_SIZE, 84, 84, color(255,0,0));
+  
+  print("root Quandtree is leaf = " + _rootQuadtree.getLURegion().getLURegion().isLeaf());
   
   
   cutGridShow(outputImage, CUT_SIZE, color(25));
   
   // Draw a origin points.
-  drawCrossLine(outputImage, 0, 0, color(0,0,255));
+  //drawCrossLine(outputImage, 0, 0, color(0,0,255));
   
   
   
@@ -65,7 +76,7 @@ void setup(){
   fill(0, 0, 255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
-  //outputImage.save(dataPath("octree_map_008.png"));
+  //outputImage.save(dataPath("quadtree_map_008.png"));
 }//end setup
 
 
@@ -76,7 +87,7 @@ void draw(){
 
 
 
-RegionMapInformation octreeCutting(PImage _image, float[] _mapArray, int _cutSize, int _originalLUPointX, int _originalLUPointY,
+RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutSize, int _originalLUPointX, int _originalLUPointY,
                                   int _originalRDPointX, int _originalRDPointY, int _gridWidth, int _gridHeight){
                                     
   RegionMapInformation resultMap;
@@ -85,12 +96,14 @@ RegionMapInformation octreeCutting(PImage _image, float[] _mapArray, int _cutSiz
   int _regionHeight = abs(_originalRDPointY - _originalLUPointY + 1);
   
   //Cutting size is small.
-  if(((_regionWidth/2)*2)/2 < _cutSize || ((_regionHeight/2)*2)/2 < _cutSize){
+  if((_regionWidth/2 < _cutSize) || (_regionHeight/2 < _cutSize)){
     
     //return null;
     
+    //Move center point to left up.
     int selectPointX = (_originalLUPointX + (_gridWidth/2));
     int selectPointY = (_originalLUPointY + (_gridHeight/2));
+    
     if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] <= EMITY_RATIO ){
           resultMap = new RegionMapInformation (RegionMapInformation.RegionState.EMITY_OBSTACLE,
                                                 _originalLUPointX, _originalLUPointY,
@@ -146,15 +159,6 @@ RegionMapInformation octreeCutting(PImage _image, float[] _mapArray, int _cutSiz
   int RDRegion_RDPointY = _originalLUPointY + _regionHeight - 1;
   RegionMapInformation _RDRegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
 
-  // Draw child region color
-  color emityColor = color(10, 100, 30);
-  color mixColor = color(200, 150, 20);
-  color fullColor = color(128, 128, 128);
-  drawOctreeCuttingArea(_image, _LURegion, emityColor, mixColor, fullColor);
-  drawOctreeCuttingArea(_image, _RURegion, emityColor, mixColor, fullColor);
-  drawOctreeCuttingArea(_image, _LDRegion, emityColor, mixColor, fullColor);
-  drawOctreeCuttingArea(_image, _RDRegion, emityColor, mixColor, fullColor);
-
   // Determine whether the sub-region is empty-obstacle
   if(_LURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
       _RURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
@@ -180,15 +184,14 @@ RegionMapInformation octreeCutting(PImage _image, float[] _mapArray, int _cutSiz
     resultMap = new RegionMapInformation (RegionMapInformation.RegionState.MIXED_OBSTACLE,
                                                 _originalLUPointX, _originalLUPointY,
                                                 _originalLUPointX + _regionWidth, _originalLUPointY + _regionHeight);
+    resultMap.setLURegion(quadtreeCutting(_image, _mapArray, _cutSize, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setRURegion(quadtreeCutting(_image, _mapArray, _cutSize, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setLDRegion(quadtreeCutting(_image, _mapArray, _cutSize, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setRDRegion(quadtreeCutting(_image, _mapArray, _cutSize, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY, _gridWidth, _gridHeight));
   }//end if
 
-  resultMap.setLURegion(octreeCutting(_image, _mapArray, _cutSize, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY, _gridWidth, _gridHeight));
-  resultMap.setRURegion(octreeCutting(_image, _mapArray, _cutSize, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY, _gridWidth, _gridHeight));
-  resultMap.setLDRegion(octreeCutting(_image, _mapArray, _cutSize, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY, _gridWidth, _gridHeight));
-  resultMap.setRDRegion(octreeCutting(_image, _mapArray, _cutSize, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY, _gridWidth, _gridHeight));
-  
   return resultMap;
-}//end octreeCutting
+}//end quadtreeCutting
 
 
 
@@ -228,7 +231,7 @@ int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int
   int selectPointY = (_LUPointY + (_gridHeight/2));
 
   
-  println("cutRectangleJudgment _LUPoint (" + _LUPointX + ", " + _LUPointY + ") _RDPoint (" + _RDPointX + ", " + _RDPointY + ")");
+  if(DEBUG) { println("cutRectangleJudgment _LUPoint (" + _LUPointX + ", " + _LUPointY + ") _RDPoint (" + _RDPointX + ", " + _RDPointY + ")"); }
   //println("rectangleWidth = " + (abs(rectangleWidth)+1) + ", rectangleHeight = " + (abs(rectangleHeight)+1));
   
   if(rectangleWidth == 0  || rectangleHeight == 0){
@@ -237,8 +240,8 @@ int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int
     int indexX = rectangleWidth/abs(rectangleWidth);
     int indexY = rectangleHeight/abs(rectangleHeight);
     
-    for(int j=0; j<=abs(rectangleHeight) + 1; j++){
-      for(int i=0; i<abs(rectangleWidth) + 1; i++){
+    for(int j=0; j<=(abs(rectangleHeight) + 1); j++){
+      for(int i=0; i<(abs(rectangleWidth) + 1); i++){
   
         //println("selectPoint ("+selectPointX+","+selectPointY+") index = " + (selectPointX  + (selectPointY * _gridWidth)));
   
@@ -282,6 +285,31 @@ int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int
 
 
 
-void judgmentPointOctree(){
+void judgmentPointQuadtree(){
   
-}//end judgmentPointOctree
+}//end judgmentPointQuad
+
+
+
+void drawQuadtreeState(PImage _image, RegionMapInformation _quadtree, color _emityColor, color _mixColor, color _fullColor){
+  
+  if(_quadtree != null){
+    
+    if( (_quadtree.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE) || 
+        (_quadtree.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE)){
+          
+      drawQuadtreeCuttingArea(_image, _quadtree, _emityColor, _mixColor, _fullColor); 
+          
+    }else if( (_quadtree.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE) && _quadtree.isLeaf() ){
+      
+      drawQuadtreeCuttingArea(_image, _quadtree, _emityColor, _mixColor, _fullColor); 
+        
+    }else if( (_quadtree.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE) && !_quadtree.isLeaf() ){
+      // Draw child region color
+      drawQuadtreeState(_image, _quadtree.getLURegion(), _emityColor, _mixColor, _fullColor);
+      drawQuadtreeState(_image, _quadtree.getRURegion(), _emityColor, _mixColor, _fullColor);
+      drawQuadtreeState(_image, _quadtree.getLDRegion(), _emityColor, _mixColor, _fullColor);
+      drawQuadtreeState(_image, _quadtree.getRDRegion(), _emityColor, _mixColor, _fullColor); 
+    }//end if
+  }//end if
+}//end drawQUadtreeState

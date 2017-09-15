@@ -48,6 +48,11 @@ class RegionMapInformation{
   public void setParentRegion(RegionMapInformation _region){ parentRegion = _region; }
   public RegionMapInformation getParentRegion(){ return parentRegion; }
   
+  public int getRegionWidth(){return (abs(RDPointX - LUPointX) + 1);}
+  public int getRegionHeight(){return (abs(RDPointY - LUPointY) + 1);}
+  
+  public boolean isLeaf(){ return ((LURegion==null)&&(RURegion==null)&&(LDRegion==null)&&(RDRegion==null)); }
+  
   //Constructor
   RegionMapInformation(int _state, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
     STATE = _state;
