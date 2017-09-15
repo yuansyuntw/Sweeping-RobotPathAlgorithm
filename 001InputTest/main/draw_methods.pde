@@ -97,3 +97,95 @@ void cutGridShow(PImage _image, int _cutSize, color _color){
     }
   }
 }//end cutGridShow
+
+
+
+void drawOctreeCuttingArea(PImage _image, RegionMapInformation _region, color _emityColor, color _mixColor, color _fullColor){
+
+  color _decisionColor;
+
+  if(_region.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE){
+    _decisionColor = _emityColor;
+  }else if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
+    _decisionColor = _mixColor;
+    return;
+  }else{
+    _decisionColor = _fullColor;
+  }
+  
+  /*
+  print("drawCuttingRegionPoint LUPoint = (" + _region.getLUPointX() + ", " + _region.getLUPointY() + ") RDPoint = (" + _region.getRDPointX() + ", " + _region.getRDPointY() + ")\n");
+  drawCuttingRegionPoint(_image, _cutSize, _region.getLUPointX(), _region.getLUPointY(), _decisionColor);
+  drawCuttingRegionPoint(_image, _cutSize, _region.getRDPointX(), _region.getRDPointY(), _decisionColor);
+  */
+
+  
+  int _width = _region.getRDPointX() - _region.getLUPointX();
+  int _height = _region.getRDPointY() - _region.getLUPointY();
+
+  int selectPointX = _region.getLUPointX();
+  int selectPointY = _region.getLUPointY();
+  
+  if(_width == 0 || _height == 0){
+    drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
+  }else{
+    int indexX = _width/abs(_width);
+    int indexY = _height/abs(_height);
+
+    for(int j=0; j < abs(_height); j++){
+      for(int i=0; i < abs(_width); i++){
+        drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
+        selectPointX += indexX;
+      }
+      selectPointX = _region.getLUPointX();
+      selectPointY += indexY;
+    }//end for
+  }//end if
+}//end drawIctreeCuttingArea
+
+
+
+
+void drawOctreeCuttingCrossLine(PImage _image, RegionMapInformation _region, color _color){
+  
+  if(_region!=null){
+    if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
+      
+      drawOctreeCuttingCrossLine(_image, _region.getLURegion(), _color);
+      drawOctreeCuttingCrossLine(_image, _region.getRURegion(), _color);
+      drawOctreeCuttingCrossLine(_image, _region.getLDRegion(), _color);
+      drawOctreeCuttingCrossLine(_image, _region.getRDRegion(), _color);
+      
+    }else{
+      
+      int _width = _region.getRDPointX() - _region.getLUPointX();
+      int _height = _region.getRDPointY() - _region.getLUPointY();
+
+      int selectPointX = _region.getLUPointX();
+      int selectPointY = _region.getLUPointY();
+      
+      if(_width == 0 || _height == 0){
+        return ;
+      }else{
+        int indexX = _width/abs(_width);
+        int indexY = _height/abs(_height);
+        
+        //Horizontal Line
+        selectPointX = _region.getLUPointX();
+        selectPointY = _region.getLUPointY() + _height/2;
+        for(int i=0; i<abs(_width)+1; i++){
+          drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _color);
+          selectPointX += indexX;
+        }//end for
+        
+        //Vertical Line
+        selectPointX = _region.getLUPointX() + _width/2;
+        selectPointY = _region.getLUPointY();
+        for(int j=0; j<abs(_height)+1; j++){
+          drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _color);
+          selectPointY += indexY;
+        }//end for
+      }//end for
+    }//end if
+  }//edn if
+}//end frawOctreeCuttinCrossLine
