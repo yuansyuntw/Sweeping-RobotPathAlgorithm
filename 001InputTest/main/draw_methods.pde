@@ -44,7 +44,7 @@ void drawRegion(PImage _image, int _point1X, int _point1Y, int _point2X, int _po
   
   if(_height==0){
     
-    for(int i=0; i<(abs(_width)+1); i++){
+    for(int i=0; i<(abs(_width)); i++){
       //print("Point " + selectPointX + " " + selectPointY + ", ");
       _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
       selectPointX += indexX;
@@ -59,7 +59,7 @@ void drawRegion(PImage _image, int _point1X, int _point1Y, int _point2X, int _po
         
       }else{
         
-        for(int i=0; i<(abs(_width)+1); i++){
+        for(int i=0; i<(abs(_width)); i++){
           //print("Point " + selectPointX + " " + selectPointY + ", ");
           _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
           selectPointX += indexX;
@@ -212,8 +212,8 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
     int indexX = _width/abs(_width);
     int indexY = _height/abs(_height);
 
-    for(int j=0; j <= abs(_width)+1; j++){
-      for(int i=0; i < abs(_height)+1; i++){
+    for(int j=0; j < abs(_width); j++){
+      for(int i=0; i < abs(_height); i++){
         drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
         selectPointX += indexX;
       }
@@ -223,7 +223,6 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
     
   }//end if
 }//end drawIctreeCuttingArea
-
 
 
 
@@ -257,7 +256,7 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
         selectPointX = _region.getLUPointX();
         selectPointY = _region.getLUPointY() + _height/2;
         
-        if((abs(_height)+1) % 2 == 1){
+        if(abs(_height) % 2 == 1){
           
           //Odd
           for(int i=0; i<abs(_width); i++){
@@ -279,7 +278,7 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
         selectPointX = _region.getLUPointX() + _width/2;
         selectPointY = _region.getLUPointY();
         
-        if((abs(_width)+1) % 2 == 1){
+        if(abs(_width) % 2 == 1){
           
           //Odd
           for(int j=0; j<abs(_height); j++){

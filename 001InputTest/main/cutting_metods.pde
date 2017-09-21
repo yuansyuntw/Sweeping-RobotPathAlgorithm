@@ -12,19 +12,19 @@ float rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPoin
   // Check rectangle color
   int selectPointX = _LUPointX;
   int selectPointY = _LUPointY;
-  for(int j=0 ; j <abs(_height); j++){
+  for(int j=0 ; j < abs(_height) ; j++){
     for(int i=0 ; i < abs(_width) ; i++){
-      if(_image.pixels[coordinateToImageIndex(_image,selectPointX,selectPointY)]!=_color){
+      if(_image.pixels[coordinateToImageIndex(_image,selectPointX,selectPointY)] != _color){
         //print("Image[" + selectPointX + "," + selectPointY + "]=" +_image.pixels[coordinateToImageIndex(_image,selectPointX,selectPointX)] + " _color = " + _color + " ");
         obstacleNumber ++;
       }
-      selectPointX = _LUPointX;
       selectPointX += indexX;
     }
+    selectPointX = _LUPointX;
     selectPointY += indexY;
   }//end for
   
-  return ( obstacleNumber/(abs(_height)*abs(_width)) );
+  return ( float(obstacleNumber) / (abs(_height)*abs(_width)) );
 }//end rectangleJudgment
 
 
@@ -65,7 +65,7 @@ float[] getImageGridArray(PImage _image, int _cutSize,color _color){
       
       //Draw Region Color
       if(gridArray[gridIndex] == 0.0){
-        drawCuttingRegionPoint(_image, _cutSize, i, j, color(255,255,255));
+        //drawCuttingRegionPoint(_image, _cutSize, i, j, color(255,255,255));
       }
       
       gridIndex += 1;
