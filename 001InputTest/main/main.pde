@@ -3,6 +3,7 @@ PImage outputImage;
 
 //String IMAGE_PATH = "data/Test_Image.tif";
 String IMAGE_PATH = "data/octree1x1.tif";
+//String IMAGE_PATH = "data/octree1x1test.tif";
 int IMAGE_WIDTH = 1024, IMAGE_HEIGHT = 1024;
 
 // Robot Size is 30 cm. 
@@ -29,8 +30,7 @@ void setup(){
   
   // Cut grid image.
   float[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
-  
-
+  cutGridShow(outputImage, CUT_SIZE, color(25));
   
   
   //findVertex(inputImage, CUT_SIZE, gridArray);
@@ -42,21 +42,26 @@ void setup(){
   
   // Draw region crosss line
   color crossColor = color(200, 200 ,30);
-  //drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor);
+  drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor);
   
   color emityColor = color(10, 100, 30);
   color mixColor = color(200, 150, 20);
   color fullColor = color(128, 128, 128);
-  drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  //drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
   
   //print("_rootQuadtree LUPOintX = " + _rootQuadtree.getLUPointX() + " LUPointY = " + _rootQuadtree.getLUPointY());
   drawCuttingRegionPoint(outputImage, CUT_SIZE, -84, -84, color(255,0,0));
   drawCuttingRegionPoint(outputImage, CUT_SIZE, 84, 84, color(255,0,0));
+  drawCuttingRegionPoint(outputImage, CUT_SIZE, 0, 0, color(255,0,0));
+  drawCuttingRegionPointRight(outputImage, CUT_SIZE, 0, 0, color(0,255,0));
+  drawCuttingRegionPointDown(outputImage, CUT_SIZE, 0, 0, color(0,255,0));
+  drawCuttingRegionPointCenterVertical(outputImage, CUT_SIZE, 1, 1, color(0,255,0));
+  drawCuttingRegionPointCenterHorizontal(outputImage, CUT_SIZE, 1, 1, color(0,255,0));
   
   print("root Quandtree is leaf = " + _rootQuadtree.getLURegion().getLURegion().isLeaf());
   
   
-  cutGridShow(outputImage, CUT_SIZE, color(25));
+  
   
   // Draw a origin points.
   //drawCrossLine(outputImage, 0, 0, color(0,0,255));
@@ -76,7 +81,7 @@ void setup(){
   fill(0, 0, 255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
-  //outputImage.save(dataPath("quadtree_map_008.png"));
+  outputImage.save(dataPath("quadtree_map_010.png"));
 }//end setup
 
 
@@ -236,12 +241,20 @@ int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int
   
   if(rectangleWidth == 0  || rectangleHeight == 0){
     
+    if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] <= EMITY_RATIO ){
+          return RegionMapInformation.RegionState.EMITY_OBSTACLE;
+    }else if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] >= FULL_RATIO ){
+          return RegionMapInformation.RegionState.FULL_OBSTACLE;
+    }else{
+          return RegionMapInformation.RegionState.MIXED_OBSTACLE;
+    }//end if
+    
   }else{
     int indexX = rectangleWidth/abs(rectangleWidth);
     int indexY = rectangleHeight/abs(rectangleHeight);
     
-    for(int j=0; j<=(abs(rectangleHeight) + 1); j++){
-      for(int i=0; i<(abs(rectangleWidth) + 1); i++){
+    for(int j=0; j<=(abs(rectangleHeight)); j++){
+      for(int i=0; i<=(abs(rectangleWidth)); i++){
   
         //println("selectPoint ("+selectPointX+","+selectPointY+") index = " + (selectPointX  + (selectPointY * _gridWidth)));
   
