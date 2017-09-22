@@ -206,7 +206,7 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
   }//end for
   
   //add one gird color
-  if(_width == 1){
+  if(_width == 0){
     selectPointX = _region.getLUPointX();
     selectPointY = _region.getLUPointY();
     for(int i=0;i <= abs(_height); i++){
@@ -216,7 +216,7 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
   }//end if
   
   //add one gird color
-  if(_height == 1){
+  if(_height == 0){
     selectPointX = _region.getLUPointX();
     selectPointY = _region.getLUPointY();
     for(int i=0;i <= abs(_width); i++){
@@ -230,17 +230,17 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
 
 
 
-void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, color _color){
+void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, color _color, float _colorRatio){
   
   if(_region!=null){
     if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
       
-      _color *= 0.75;
+      _color *= _colorRatio;
       
-      if(_region.getLURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLURegion(), _color);
-      if(_region.getRURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getRURegion(), _color);
-      if(_region.getLDRegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLDRegion(), _color);
-      if(_region.getRDRegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getRDRegion(), _color);
+      if(_region.getLURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLURegion(), _color, _colorRatio);
+      if(_region.getRURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getRURegion(), _color, _colorRatio);
+      if(_region.getLDRegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLDRegion(), _color, _colorRatio);
+      if(_region.getRDRegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getRDRegion(), _color, _colorRatio);
       
     }else{
       
@@ -255,60 +255,103 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
         indexX = 1;
       }else{
         indexX = _width/abs(_width);
-      }
+      }//end if
       
       int indexY;
       if(_height==0){
         indexY = 1;
       }else{
         indexY = _height/abs(_height);
-      }
+      }//end if
       
       
       //Horizontal Line
       selectPointX = _region.getLUPointX();
       selectPointY = _region.getLUPointY() + _height/2;
+      if(_height==0){
         
-      if(abs(_height) % 2 == 1){
-          
-        //Odd
-        for(int i=0; i<abs(_width); i++){
+        //One grid corress line
+        for(int i=0; i<=abs(_width); i++){
           drawCuttingRegionPointCenterHorizontal(_image, CUT_SIZE, selectPointX, selectPointY, _color);
           selectPointX += indexX;
         }//end for
+        
+      }else {
+        if(abs(_height) % 2 == 1){
+            
+          //Odd
+          for(int i=0; i<abs(_width); i++){
+            drawCuttingRegionPointCenterHorizontal(_image, CUT_SIZE, selectPointX, selectPointY, _color);
+            selectPointX += indexX;
+          }//end for
+            
+        }else{
+            
+          //Even
+          for(int i=0; i<abs(_width); i++){
+            drawCuttingRegionPointDown(_image, CUT_SIZE, selectPointX, selectPointY-1, _color);
+            selectPointX += indexX;
+          }//end for
           
-      }else{
-          
-        //Even
-        for(int i=0; i<abs(_width); i++){
-          drawCuttingRegionPointDown(_image, CUT_SIZE, selectPointX, selectPointY-1, _color);
-          selectPointX += indexX;
-        }//end for
-          
+        }//end if
       }//end if
         
       //Vertical Line
       selectPointX = _region.getLUPointX() + _width/2;
       selectPointY = _region.getLUPointY();
+      if(_width==0){
         
-      if(abs(_width) % 2 == 1){
-          
-        //Odd
-        for(int j=0; j<abs(_height); j++){
+        //One grid crossline
+        for(int j=0; j<=abs(_height); j++){
           drawCuttingRegionPointCenterVertical(_image, CUT_SIZE, selectPointX, selectPointY, _color);
           selectPointY += indexY;
         }//end for
-          
-      }else{
-          
-        //Even
-        for(int j=0; j<abs(_height); j++){
-          drawCuttingRegionPointRight(_image, CUT_SIZE, selectPointX-1, selectPointY, _color);
-          selectPointY += indexY;
-        }//end for
         
+      }else {
+        if(abs(_width) % 2 == 1){
+            
+          //Odd
+          for(int j=0; j<abs(_height); j++){
+            drawCuttingRegionPointCenterVertical(_image, CUT_SIZE, selectPointX, selectPointY, _color);
+            selectPointY += indexY;
+          }//end for
+            
+        }else{
+            
+          //Even
+          for(int j=0; j<abs(_height); j++){
+            drawCuttingRegionPointRight(_image, CUT_SIZE, selectPointX-1, selectPointY, _color);
+            selectPointY += indexY;
+          }//end for
+          
+        }//end if
       }//end if
     }//end if
   }//edn if
   
 }//end frawQtreeCuttinCrossLine
+
+
+
+void drawQuadtreeState(PImage _image, RegionMapInformation _quadtree, color _emityColor, color _mixColor, color _fullColor){
+  
+  if(_quadtree != null){
+    
+    if( (_quadtree.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE) || 
+        (_quadtree.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE) ){
+          
+      drawQuadtreeCuttingArea(_image, _quadtree, _emityColor, _mixColor, _fullColor); 
+          
+    }else if( (_quadtree.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE) && _quadtree.isLeaf() ){
+      
+      drawQuadtreeCuttingArea(_image, _quadtree, _emityColor, _mixColor, _fullColor); 
+        
+    }else if( (_quadtree.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE) && !_quadtree.isLeaf() ){
+      // Draw child region color
+      drawQuadtreeState(_image, _quadtree.getLURegion(), _emityColor, _mixColor, _fullColor);
+      drawQuadtreeState(_image, _quadtree.getRURegion(), _emityColor, _mixColor, _fullColor);
+      drawQuadtreeState(_image, _quadtree.getLDRegion(), _emityColor, _mixColor, _fullColor);
+      drawQuadtreeState(_image, _quadtree.getRDRegion(), _emityColor, _mixColor, _fullColor); 
+    }//end if
+  }//end if
+}//end drawQUadtreeState

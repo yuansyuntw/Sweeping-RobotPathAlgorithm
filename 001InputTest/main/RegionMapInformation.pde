@@ -50,6 +50,7 @@ class RegionMapInformation{
   
   public int getRegionWidth(){return (abs(RDPointX - LUPointX) + 1);}
   public int getRegionHeight(){return (abs(RDPointY - LUPointY) + 1);}
+  public int getRegionArea(){ return(getRegionWidth() * getRegionHeight()); }
   
   public boolean isLeaf(){ return ((LURegion==null)&&(RURegion==null)&&(LDRegion==null)&&(RDRegion==null)); }
   
