@@ -2,9 +2,9 @@
 void drawCrossLine(PImage _image, int _pointX, int _pointY, color _color){
   for(int i=0; i < _image.width; i++){
     //Vertical Line
-    _image.pixels[coordinateToImageIndex(_image, _pointX, _pointY+i)] = _color;
+    _image.pixels[coordinateToImageIndex(_image, _pointX, (-_image.width/2)+i)] = _color;
     //Horizontal Line
-    _image.pixels[coordinateToImageIndex(_image, _pointX+i, _pointY)] = _color;
+    _image.pixels[coordinateToImageIndex(_image, (-_image.height/2)+i, _pointY)] = _color;
   }
   
   _image.updatePixels();
@@ -41,17 +41,15 @@ void drawRegion(PImage _image, int _point1X, int _point1Y, int _point2X, int _po
     indexY = _height/abs(_height);
   }
 
-  print("Point = \n");
-  for(int j=0; j<(abs(_height)); j++){
-    for(int i=0; i<(abs(_width)); i++){
-      print("(" + selectPointX + ", " + selectPointY + ")=" + coordinateToImageIndex(_image, selectPointX, selectPointY) + " ");
+  for(int j=0; j<=(abs(_height)); j++){
+    for(int i=0; i<=(abs(_width)); i++){
+      //print("(" + selectPointX + ", " + selectPointY + ")=" + coordinateToImageIndex(_image, selectPointX, selectPointY) + " ");
       _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
       selectPointX += indexX;
     }//end for
     selectPointX = _point1X;
     selectPointY += indexY;
   }//end for
-  print("\n\n");
 
   _image.updatePixels();
 }//end drawRegion
@@ -63,6 +61,7 @@ void drawCuttingRegionPoint(PImage _image, int _cutSize, int _cutPointX, int _cu
   int LUPointY = _cutSize*_cutPointY - _cutSize/2;
   int RDPointX = _cutSize*_cutPointX + _cutSize/2;
   int RDPointY = _cutSize*_cutPointY + _cutSize/2;
+  //print("LUpoint = (" + LUPointX + "," + LUPointY + ") RDPoint = (" + RDPointX + "," + RDPointY + ")\n");
   
    drawRegion(_image, LUPointX, LUPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingPoint
@@ -191,19 +190,41 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
   int indexY;
   if(_height == 0){
     indexY = 1;
+    drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
   }else{
     indexY = _height/abs(_height);
   }//end if
     
 
-  for(int j=0; j <= abs(_height); j++){
-    for(int i=0; i <= abs(_width); i++){
+  for(int j=0; j < abs(_height); j++){
+    for(int i=0; i < abs(_width); i++){
       drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
       selectPointX += indexX;
     }
     selectPointX = _region.getLUPointX();
     selectPointY += indexY;
   }//end for
+  
+  //add one gird color
+  if(_width == 1){
+    selectPointX = _region.getLUPointX();
+    selectPointY = _region.getLUPointY();
+    for(int i=0;i <= abs(_height); i++){
+      drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
+      selectPointY += indexY;
+    }
+  }//end if
+  
+  //add one gird color
+  if(_height == 1){
+    selectPointX = _region.getLUPointX();
+    selectPointY = _region.getLUPointY();
+    for(int i=0;i <= abs(_width); i++){
+      drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
+      selectPointX += indexX;
+    }
+  }//end if
+  
 
 }//end drawIctreeCuttingArea
 
@@ -213,6 +234,8 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
   
   if(_region!=null){
     if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
+      
+      _color *= 0.75;
       
       if(_region.getLURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLURegion(), _color);
       if(_region.getRURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getRURegion(), _color);
@@ -227,57 +250,63 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
       int selectPointX = _region.getLUPointX();
       int selectPointY = _region.getLUPointY();
       
-      if(_width == 0 || _height == 0){
-        drawCuttingRegionPointCenterHorizontal(_image, CUT_SIZE, selectPointX, selectPointY, _color);
-        drawCuttingRegionPointCenterVertical(_image, CUT_SIZE, selectPointX, selectPointY, _color);
-        return ;
+      int indexX;
+      if(_width==0){
+        indexX = 1;
       }else{
-        int indexX = _width/abs(_width);
-        int indexY = _height/abs(_height);
+        indexX = _width/abs(_width);
+      }
+      
+      int indexY;
+      if(_height==0){
+        indexY = 1;
+      }else{
+        indexY = _height/abs(_height);
+      }
+      
+      
+      //Horizontal Line
+      selectPointX = _region.getLUPointX();
+      selectPointY = _region.getLUPointY() + _height/2;
         
-        //Horizontal Line
-        selectPointX = _region.getLUPointX();
-        selectPointY = _region.getLUPointY() + _height/2;
+      if(abs(_height) % 2 == 1){
+          
+        //Odd
+        for(int i=0; i<abs(_width); i++){
+          drawCuttingRegionPointCenterHorizontal(_image, CUT_SIZE, selectPointX, selectPointY, _color);
+          selectPointX += indexX;
+        }//end for
+          
+      }else{
+          
+        //Even
+        for(int i=0; i<abs(_width); i++){
+          drawCuttingRegionPointDown(_image, CUT_SIZE, selectPointX, selectPointY-1, _color);
+          selectPointX += indexX;
+        }//end for
+          
+      }//end if
         
-        if(abs(_height) % 2 == 1){
-          
-          //Odd
-          for(int i=0; i<abs(_width); i++){
-            drawCuttingRegionPointCenterHorizontal(_image, CUT_SIZE, selectPointX, selectPointY, _color);
-            selectPointX += indexX;
-          }//end for
-          
-        }else{
-          
-          //Even
-          for(int i=0; i<abs(_width); i++){
-            drawCuttingRegionPointDown(_image, CUT_SIZE, selectPointX, selectPointY-1, _color);
-            selectPointX += indexX;
-          }//end for
-          
-        }//end if
+      //Vertical Line
+      selectPointX = _region.getLUPointX() + _width/2;
+      selectPointY = _region.getLUPointY();
         
-        //Vertical Line
-        selectPointX = _region.getLUPointX() + _width/2;
-        selectPointY = _region.getLUPointY();
+      if(abs(_width) % 2 == 1){
+          
+        //Odd
+        for(int j=0; j<abs(_height); j++){
+          drawCuttingRegionPointCenterVertical(_image, CUT_SIZE, selectPointX, selectPointY, _color);
+          selectPointY += indexY;
+        }//end for
+          
+      }else{
+          
+        //Even
+        for(int j=0; j<abs(_height); j++){
+          drawCuttingRegionPointRight(_image, CUT_SIZE, selectPointX-1, selectPointY, _color);
+          selectPointY += indexY;
+        }//end for
         
-        if(abs(_width) % 2 == 1){
-          
-          //Odd
-          for(int j=0; j<abs(_height); j++){
-            drawCuttingRegionPointCenterVertical(_image, CUT_SIZE, selectPointX, selectPointY, _color);
-            selectPointY += indexY;
-          }//end for
-          
-        }else{
-          
-          //Even
-          for(int j=0; j<abs(_height); j++){
-            drawCuttingRegionPointRight(_image, CUT_SIZE, selectPointX-1, selectPointY, _color);
-            selectPointY += indexY;
-          }//end for
-        
-        }//end if
       }//end if
     }//end if
   }//edn if

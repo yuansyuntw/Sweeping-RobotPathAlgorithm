@@ -27,10 +27,11 @@ void setup(){
   
   // Protect input image.
   outputImage = inputImage;
+  //print("output image width = " + outputImage.width + " height = " + outputImage.height + "\n");
   
   // Cut grid image.
   float[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
-  //cutGridShow(outputImage, CUT_SIZE, color(25));
+  
   
   
   //findVertex(inputImage, CUT_SIZE, gridArray);
@@ -38,25 +39,33 @@ void setup(){
   int cutHeight = getImageGridHeight(inputImage, CUT_SIZE);
   println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + "\n");
   RegionMapInformation _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
-  print("\nQuadtree Cutting End\n");
+  print("Quadtree Cutting End\n\n");
   
   color emityColor = color(10, 100, 30);
   color mixColor = color(200, 150, 20);
   color fullColor = color(128, 128, 128);
-  //drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  
+  cutGridShow(outputImage, CUT_SIZE, color(25));
   
   // Draw region crosss line
   color crossColor = color(200, 200 ,30);
-  //drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor);
+  drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor);
   
-  drawCuttingRegionPoint(outputImage, CUT_SIZE, -84, -84, color(255,0,0));
-  drawCuttingRegionPoint(outputImage, CUT_SIZE, 84, 84, color(255,0,0));
+  //drawCuttingRegionPoint(outputImage, CUT_SIZE, -84, -84, color(255,0,0));
+  //drawCuttingRegionPoint(outputImage, CUT_SIZE, 84, 84, color(255,0,0));
   
   // Draw a origin points.
-  drawCrossLine(outputImage, 0, 0, color(0,0,255));
+  //drawCrossLine(outputImage, 0, 0, color(0,0,255));
   
-  print("Test pointd = " + coordinateToImageIndex(outputImage, -512,-512));
+  println("Test point = " + coordinateToImageIndex(outputImage, -512, -512));
+  drawCrossLine(outputImage, -512, -512, color(255,0,0));
+  
+  println("Test point = " + coordinateToImageIndex(outputImage, 0, 0));
   drawCrossLine(outputImage, 0, 0, color(255,0,0));
+  
+  println("Test point = " + coordinateToImageIndex(outputImage, 511, 511));
+  drawCrossLine(outputImage, 511, 511, color(255,0,0));
   
   // drawLine(0,0, pointX, pointY);
   //println(ZPath(0, 0, pointX, pointY, 6));
@@ -71,7 +80,7 @@ void setup(){
   fill(0, 0, 255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
-  //outputImage.save(dataPath("quadtree_map_014.png"));
+  //outputImage.save(dataPath("quadtree_map_018.png"));
 }//end setup
 
 
@@ -243,7 +252,7 @@ int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int
   }else if ( (averageObstacleRatio/(indexX * indexY)) >= FULL_RATIO ){
     result = RegionMapInformation.RegionState.FULL_OBSTACLE;
   }else{
-    print("Obstacle Ratio = " + averageObstacleRatio + " ");
+    //print("Obstacle Ratio = " + averageObstacleRatio + " ");
     result = RegionMapInformation.RegionState.MIXED_OBSTACLE;
   }
   
