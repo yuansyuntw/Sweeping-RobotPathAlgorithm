@@ -1,6 +1,6 @@
 
 int coordinateToImageIndex(PImage _image, int _pointX, int _pointY){
-    return _image.width*(_image.height/2-1 + _pointY) + (_image.width/2 + _pointX);
+    return (_image.width*((_image.height/2 + _pointY - 1) + (_image.width/2 + _pointX - 1)));
 }//end coordinateToImageIndex
 
 // Draw a point 

@@ -12,13 +12,13 @@ int CUT_SIZE = 6;
 int CENTER_INDEX = IMAGE_WIDTH * ((IMAGE_HEIGHT/2) - 1) + IMAGE_WIDTH/2;
 int PATH_COLOR = color(254,254,254);
 
-float EMITY_RATIO = 0.1;
-float FULL_RATIO = 0.9;
+float EMITY_RATIO = 0.05;
+float FULL_RATIO = 0.995;
 
 
 
 void setup(){
-  size(1024, 1024);
+  size(1025, 1025);
   background(0);
   
   // Open image file.
@@ -40,22 +40,23 @@ void setup(){
   RegionMapInformation _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
   print("\nQuadtree Cutting End\n");
   
+  color emityColor = color(10, 100, 30);
+  color mixColor = color(200, 150, 20);
+  color fullColor = color(128, 128, 128);
+  //drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  
   // Draw region crosss line
   color crossColor = color(200, 200 ,30);
   //drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor);
   
-  //print("_rootQuadtree LUPOintX = " + _rootQuadtree.getLUPointX() + " LUPointY = " + _rootQuadtree.getLUPointY());
-  //drawCuttingRegionPoint(outputImage, CUT_SIZE, 0, 0, color(255,0,0));
-  
-  color emityColor = color(10, 100, 30);
-  color mixColor = color(200, 150, 20);
-  color fullColor = color(128, 128, 128);
-  drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  drawCuttingRegionPoint(outputImage, CUT_SIZE, -84, -84, color(255,0,0));
+  drawCuttingRegionPoint(outputImage, CUT_SIZE, 84, 84, color(255,0,0));
   
   // Draw a origin points.
-  //drawCrossLine(outputImage, 0, 0, color(0,0,255));
+  drawCrossLine(outputImage, 0, 0, color(0,0,255));
   
-  
+  print("Test pointd = " + coordinateToImageIndex(outputImage, -512,-512));
+  drawCrossLine(outputImage, 0, 0, color(255,0,0));
   
   // drawLine(0,0, pointX, pointY);
   //println(ZPath(0, 0, pointX, pointY, 6));
@@ -70,7 +71,7 @@ void setup(){
   fill(0, 0, 255);
   //text("EndPoint", pointX + (IMAGE_WIDTH/2), pointY + (IMAGE_HEIGHT/2));
   
-  //outputImage.save(dataPath("quadtree_map_012.png"));
+  //outputImage.save(dataPath("quadtree_map_014.png"));
 }//end setup
 
 
@@ -91,31 +92,8 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
   
   //Cutting size is small.
   if((_regionWidth/2 < _cutSize) || (_regionHeight/2 < _cutSize)){
-    //println("regionWidth = " + _regionWidth + " _regionHeight = " + _regionHeight);
-    
     //return null;
-    
-    //Move center point to left up.
-    int selectPointX = (_originalLUPointX + (_gridWidth/2));
-    int selectPointY = (_originalLUPointY + (_gridHeight/2));
-    //println("ration = " + _mapArray[selectPointX  + (selectPointY * _gridWidth)]);
-    
-    if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] <= EMITY_RATIO ){
-      //println("Emity region");
-          resultMap = new RegionMapInformation (RegionMapInformation.RegionState.EMITY_OBSTACLE,
-                                                _originalLUPointX, _originalLUPointY,
-                                                _originalRDPointX, _originalRDPointY);
-    }else if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] >= FULL_RATIO ){
-      //println("Full region");
-          resultMap = new RegionMapInformation (RegionMapInformation.RegionState.FULL_OBSTACLE,
-                                                _originalLUPointX, _originalLUPointY,
-                                                _originalRDPointX, _originalRDPointY);
-    }else{
-      println("Mixed region");
-          resultMap = new RegionMapInformation (RegionMapInformation.RegionState.MIXED_OBSTACLE,
-                                                _originalLUPointX, _originalLUPointY,
-                                                _originalRDPointX, _originalRDPointY);
-    }//end if
+    resultMap = getRegionInformation(_mapArray, _gridWidth, _gridHeight,  _originalLUPointX,_originalLUPointY,_originalRDPointX,_originalRDPointY);
     return resultMap;
   }//end if
   
@@ -220,8 +198,6 @@ RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int
 
 
 int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
-  boolean emityResult = false;
-  boolean fullResult = false;
   boolean DEBUG = false;
   
   //Check cut rectangle 
@@ -234,58 +210,41 @@ int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int
   if(DEBUG) { println("cutRectangleJudgment _LUPoint (" + _LUPointX + ", " + _LUPointY + ") _RDPoint (" + _RDPointX + ", " + _RDPointY + ")"); }
   //println("rectangleWidth = " + (abs(rectangleWidth)+1) + ", rectangleHeight = " + (abs(rectangleHeight)+1));
   
-  if(rectangleWidth == 0  || rectangleHeight == 0){
-    
-    if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] <= EMITY_RATIO ){
-          return RegionMapInformation.RegionState.EMITY_OBSTACLE;
-    }else if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] >= FULL_RATIO ){
-          return RegionMapInformation.RegionState.FULL_OBSTACLE;
-    }else{
-          return RegionMapInformation.RegionState.MIXED_OBSTACLE;
-    }//end if
-    
+  int indexX;
+  if(rectangleWidth == 0){
+    indexX = 1;
   }else{
-    int indexX = rectangleWidth/abs(rectangleWidth);
-    int indexY = rectangleHeight/abs(rectangleHeight);
-    
-    for(int j=0; j<=(abs(rectangleHeight)); j++){
-      for(int i=0; i<=(abs(rectangleWidth)); i++){
-  
-        //println("selectPoint ("+selectPointX+","+selectPointY+") index = " + (selectPointX  + (selectPointY * _gridWidth)));
-  
-        if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] <= EMITY_RATIO ){
-          emityResult = true;
-        }else if( _mapArray[selectPointX  + (selectPointY * _gridWidth)] >= FULL_RATIO ){
-          fullResult = true;
-        }
-        selectPointX += indexX;
-  
-        if(DEBUG){
-          if(_mapArray[selectPointX  + (selectPointY * _gridWidth)] <= EMITY_RATIO ){
-            print(" ");
-          }else{
-            print("X");
-          }//end if
-        }//end if
-      }//end if
-      if(DEBUG){print("\n");}
-      
-      selectPointX = (_LUPointX + (_gridWidth/2)) ;
-      selectPointY += indexY;
-    }//end for
-    if(DEBUG){print("\n");}
+    indexX = rectangleWidth/abs(rectangleWidth);
   }//end if
   
-  int result;
-  if(emityResult && !fullResult){
-    result = RegionMapInformation.RegionState.EMITY_OBSTACLE;
-    //println("Result =  Emity Obstacle Region\n");
-  }else if (!emityResult && fullResult){
-    result = RegionMapInformation.RegionState.FULL_OBSTACLE;
-    //println("Result =  Full Obstacle Region\n");
+  int indexY;
+  if(rectangleHeight == 0){
+    indexY = 1;
   }else{
+    indexY = rectangleHeight/abs(rectangleHeight);
+  }//end if
+  
+  //Average obstacle
+  float averageObstacleRatio = 0.0f;
+  for(int j=0; j<=(abs(rectangleHeight)); j++){
+    for(int i=0; i<=(abs(rectangleWidth)); i++){
+      //println("selectPoint ("+selectPointX+","+selectPointY+") index = " + (selectPointX  + (selectPointY * _gridWidth)));
+      averageObstacleRatio += _mapArray[selectPointX  + (selectPointY * _gridWidth)];
+      selectPointX += indexX;
+    }//end for
+    selectPointX = (_LUPointX + (_gridWidth/2)) ;
+    selectPointY += indexY;
+  }//end for
+  
+  int result;
+  averageObstacleRatio = (averageObstacleRatio / ((abs(rectangleHeight)+1) * (abs(rectangleWidth)+1)));
+  if( averageObstacleRatio <= EMITY_RATIO ){
+    result = RegionMapInformation.RegionState.EMITY_OBSTACLE;
+  }else if ( (averageObstacleRatio/(indexX * indexY)) >= FULL_RATIO ){
+    result = RegionMapInformation.RegionState.FULL_OBSTACLE;
+  }else{
+    print("Obstacle Ratio = " + averageObstacleRatio + " ");
     result = RegionMapInformation.RegionState.MIXED_OBSTACLE;
-    //println("Result =  Mixed Obstacle Region\n");
   }
   
   return result;

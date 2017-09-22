@@ -2,13 +2,12 @@
 void drawCrossLine(PImage _image, int _pointX, int _pointY, color _color){
   for(int i=0; i < _image.width; i++){
     //Vertical Line
-    _image.pixels[(_image.width/2 + _pointX) + i*_image.width] = _color;
+    _image.pixels[coordinateToImageIndex(_image, _pointX, _pointY+i)] = _color;
     //Horizontal Line
-    _image.pixels[_image.width*(_image.height/2 - 1 + _pointY)+i] = _color;
+    _image.pixels[coordinateToImageIndex(_image, _pointX+i, _pointY)] = _color;
   }
+  
   _image.updatePixels();
-  //image(_image,0 ,0);
-
 }//end draw Point
 
 
@@ -41,40 +40,20 @@ void drawRegion(PImage _image, int _point1X, int _point1Y, int _point2X, int _po
   }else{
     indexY = _height/abs(_height);
   }
-  
-  if(_height==0){
-    
+
+  print("Point = \n");
+  for(int j=0; j<(abs(_height)); j++){
     for(int i=0; i<(abs(_width)); i++){
-      //print("Point " + selectPointX + " " + selectPointY + ", ");
+      print("(" + selectPointX + ", " + selectPointY + ")=" + coordinateToImageIndex(_image, selectPointX, selectPointY) + " ");
       _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
       selectPointX += indexX;
     }//end for
-    
-  }else{
-    
-    for(int j=0; j<(abs(_height)); j++){
-      if(_width==0){
-        
-        _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
-        
-      }else{
-        
-        for(int i=0; i<(abs(_width)); i++){
-          //print("Point " + selectPointX + " " + selectPointY + ", ");
-          _image.pixels[coordinateToImageIndex(_image, selectPointX, selectPointY)] = _color;
-          selectPointX += indexX;
-        }//end for
-        
-      }//end if
-      
-      selectPointX = _point1X;
-      selectPointY += indexY;
-    }//end for
-    
-  }//end if
-  
+    selectPointX = _point1X;
+    selectPointY += indexY;
+  }//end for
+  print("\n\n");
+
   _image.updatePixels();
-  //image(_image, 0, 0);
 }//end drawRegion
 
 
@@ -202,26 +181,30 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
   int selectPointX = _region.getLUPointX();
   int selectPointY = _region.getLUPointY();
   
-  if(_width == 0 || _height == 0){
-    
-    //Leaf Node
-    drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
-    
+  int indexX;
+  if(_width == 0){
+    indexX = 1;
   }else{
-    
-    int indexX = _width/abs(_width);
-    int indexY = _height/abs(_height);
-
-    for(int j=0; j < abs(_width); j++){
-      for(int i=0; i < abs(_height); i++){
-        drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
-        selectPointX += indexX;
-      }
-      selectPointX = _region.getLUPointX();
-      selectPointY += indexY;
-    }//end for
-    
+    indexX = _width/abs(_width);
+  }
+  
+  int indexY;
+  if(_height == 0){
+    indexY = 1;
+  }else{
+    indexY = _height/abs(_height);
   }//end if
+    
+
+  for(int j=0; j <= abs(_height); j++){
+    for(int i=0; i <= abs(_width); i++){
+      drawCuttingRegionPoint(_image, CUT_SIZE, selectPointX, selectPointY, _decisionColor);
+      selectPointX += indexX;
+    }
+    selectPointX = _region.getLUPointX();
+    selectPointY += indexY;
+  }//end for
+
 }//end drawIctreeCuttingArea
 
 
