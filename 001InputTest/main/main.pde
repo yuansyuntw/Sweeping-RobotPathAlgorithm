@@ -15,6 +15,8 @@ int PATH_COLOR = color(254,254,254);
 float EMITY_RATIO = 0.05;
 float FULL_RATIO = 0.995;
 
+RegionMapInformation _rootQuadtree;
+
 
 
 void setup(){
@@ -36,7 +38,7 @@ void setup(){
   println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + ", arraySize = " + (cutWidth + (cutWidth * cutHeight)) + "\n");
   
   //QuadTree cutting
-  RegionMapInformation _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
+  _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
   print("Quadtree Cutting End\n\n");
   
   //cutGridShow(outputImage, CUT_SIZE, color(25));
@@ -53,22 +55,41 @@ void setup(){
   color emityColor = color(10, 100, 30);
   color mixColor = color(200, 150, 20);
   color fullColor = color(128, 128, 128);
-  //drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
   
   // Draw region crosss line
   color crossColor = color(50);
-  //drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor, 0.9);
+  drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor, 0.9);
   
   // Find Emity Region
   RegionMapInformation[] emityRegions = new RegionMapInformation[1024];
   int emityRegionsNumber = getStateRegions(_rootQuadtree, emityRegions, RegionMapInformation.RegionState.EMITY_OBSTACLE, 0);
   println("Save Index = " + emityRegionsNumber);
-  for(int i=0;i < emityRegionsNumber; i++){
-    drawQuadtreeCuttingArea(outputImage, emityRegions[i], emityColor, mixColor, fullColor);
-    drawQuadtreeCuttingCrossLine(outputImage, emityRegions[i], crossColor, 0.0);
+  for(int i=0; i<emityRegionsNumber ; i++){
+    //print("(" + i + "," + emityRegions[i].getRegionArea() + ") ");
+    //drawQuadtreeCuttingArea(outputImage, emityRegions[i], emityColor, mixColor, fullColor);
+    //drawQuadtreeCuttingCrossLine(outputImage, emityRegions[i], crossColor, 0.0);
   }//end for
   
-  //outputImage.save(dataPath("quadtree_map_021.png"));
+  // Sort Region
+  emityRegions = sortMaxAreaToMinArea(emityRegions, emityRegionsNumber);
+  int maxLevel = emityRegions[0].getRegionArea();
+  int areaLevel = maxLevel;
+  float colorRatio = 1;
+  for(int i=0; i<emityRegionsNumber ; i++){
+    //print("(" + i + "," + emityRegions[i].getRegionArea() + ") ");
+    if(emityRegions[i].getRegionArea() < areaLevel){
+      //print("have min region\n");
+      areaLevel =  emityRegions[i].getRegionArea();
+      colorRatio = float(areaLevel)/maxLevel;
+      //print("Color Ratio = " + colorRatio +"\n");
+    }
+    
+    //drawQuadtreeCuttingArea(outputImage, emityRegions[i], int(emityColor*colorRatio), int(mixColor*colorRatio), int(fullColor*colorRatio));
+    //drawQuadtreeCuttingCrossLine(outputImage, emityRegions[i], crossColor, 0.0);
+  }//end for
+  
+  //outputImage.save(dataPath("quadtree_map_022.png"));
 }//end setup
 
 
@@ -78,46 +99,60 @@ void draw(){
 }
 
 
-int getStateRegions(RegionMapInformation _quadtree, RegionMapInformation [] _saveArray, int _state, int _index){
-  int nextIndex = _index;
+void mousePressed(){
   
-  if(_quadtree.isLeaf()){
-   if(_quadtree.getRegionState() == _state){
-     _saveArray[_index] = _quadtree;
-     nextIndex = _index + 1;
-   }
-  }else{
-    //DPS
-    nextIndex = getStateRegions(_quadtree.getLURegion(), _saveArray, _state, nextIndex);
-    nextIndex = getStateRegions(_quadtree.getRURegion(), _saveArray, _state, nextIndex);
-    nextIndex = getStateRegions(_quadtree.getLDRegion(), _saveArray, _state, nextIndex);
-    nextIndex = getStateRegions(_quadtree.getRDRegion(), _saveArray, _state, nextIndex);
+  int pointX = (mouseX - IMAGE_WIDTH/2)/CUT_SIZE;
+  int pointY = (mouseY - IMAGE_HEIGHT/2)/CUT_SIZE;
+  
+  print("mouse point = (" + pointX + "," + pointY + ")\n");
+  RegionMapInformation findIt = findRegionPoint( _rootQuadtree, pointX, pointY);
+  print("find region = " + findIt + "\n");
+  if(findIt != null){
+    color emityColor = color(10, 100, 30);
+    color mixColor = color(200, 150, 20);
+    color fullColor = color(128, 128, 128);
+    drawQuadtreeCuttingArea(outputImage, findIt, emityColor, mixColor, fullColor);
+  }
+}
+
+
+RegionMapInformation findRegionPoint(RegionMapInformation _quadTree, int _pointX, int _pointY){
+  if(_quadTree != null){
+    
+    if(inRegion(_quadTree, _pointX, _pointY)){
+         
+         if(_quadTree.isLeaf()){
+           return _quadTree;
+         }else{
+           if(inRegion(_quadTree.getLURegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getLURegion(), _pointX, _pointY);
+           }
+           
+           if(inRegion(_quadTree.getRURegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getRURegion(), _pointX, _pointY);
+           }
+           
+           if(inRegion(_quadTree.getLDRegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getLDRegion(), _pointX, _pointY);
+           }
+           
+           if(inRegion(_quadTree.getRDRegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getRDRegion(), _pointX, _pointY);
+           }
+           
+           return null;
+         }
+    }//end if
   }//end if
   
-  return nextIndex;
-  
-}//end getStateRegions
+  return null;
+}//end findRegionPoint
 
-
-
-void sortMaxAreaToMinArea(RegionMapInformation[] _saveArray, int maxIndex){
- RegionMapInformation tempRegion; 
- int maxRegionIndex;
- int maxRegionArea;
- 
- for(int i=0; i<maxIndex; i++){
-   maxRegionIndex = i;
-   maxRegionArea = _saveArray[maxRegionIndex].getRegionArea();
-   for(int j=i+1; j<maxIndex; j++){
-     if(_saveArray[i].getRegionArea() > maxRegionArea ){
-       
-       //Swap array context
-       tempRegion = _saveArray[i];
-       _saveArray[i] = _saveArray[j];
-       _saveArray[j] = tempRegion;
-       tempRegion = null;
-       
-     }
-   }
- }//end for
-}//end sortMaxAreaToMinArea
+boolean inRegion(RegionMapInformation _region, int _pointX, int _pointY){
+  if(_pointX >= _region.getLUPointX() && _pointX <= _region.getRDPointX() &&
+     _pointY >= _region.getLUPointY() && _pointY <= _region.getRDPointY()){
+     return true;  
+  }
+   
+  return false;
+}//end inRegion
