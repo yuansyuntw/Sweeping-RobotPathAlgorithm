@@ -65,9 +65,10 @@ void setup(){
   println("Save Index = " + emityRegionsNumber);
   for(int i=0;i < emityRegionsNumber; i++){
     drawQuadtreeCuttingArea(outputImage, emityRegions[i], emityColor, mixColor, fullColor);
+    drawQuadtreeCuttingCrossLine(outputImage, emityRegions[i], crossColor, 0.0);
   }//end for
   
-  //outputImage.save(dataPath("quadtree_map_020.png"));
+  //outputImage.save(dataPath("quadtree_map_021.png"));
 }//end setup
 
 
@@ -96,3 +97,27 @@ int getStateRegions(RegionMapInformation _quadtree, RegionMapInformation [] _sav
   return nextIndex;
   
 }//end getStateRegions
+
+
+
+void sortMaxAreaToMinArea(RegionMapInformation[] _saveArray, int maxIndex){
+ RegionMapInformation tempRegion; 
+ int maxRegionIndex;
+ int maxRegionArea;
+ 
+ for(int i=0; i<maxIndex; i++){
+   maxRegionIndex = i;
+   maxRegionArea = _saveArray[maxRegionIndex].getRegionArea();
+   for(int j=i+1; j<maxIndex; j++){
+     if(_saveArray[i].getRegionArea() > maxRegionArea ){
+       
+       //Swap array context
+       tempRegion = _saveArray[i];
+       _saveArray[i] = _saveArray[j];
+       _saveArray[j] = tempRegion;
+       tempRegion = null;
+       
+     }
+   }
+ }//end for
+}//end sortMaxAreaToMinArea

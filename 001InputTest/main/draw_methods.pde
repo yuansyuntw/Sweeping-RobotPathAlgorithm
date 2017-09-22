@@ -235,8 +235,10 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
   if(_region!=null){
     if(_region.getRegionState() == RegionMapInformation.RegionState.MIXED_OBSTACLE){
       
-      _color *= _colorRatio;
+      //Stop draw child
+      if(_colorRatio==0) return;
       
+      _color *= _colorRatio;
       if(_region.getLURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLURegion(), _color, _colorRatio);
       if(_region.getRURegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getRURegion(), _color, _colorRatio);
       if(_region.getLDRegion()!=null)  drawQuadtreeCuttingCrossLine(_image, _region.getLDRegion(), _color, _colorRatio);
