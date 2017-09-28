@@ -38,7 +38,7 @@ void setup(){
   println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + ", arraySize = " + (cutWidth + (cutWidth * cutHeight)) + "\n");
   
   //QuadTree cutting
-  _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
+  _rootQuadtree = quadtreeCutting(outputImage, gridArray, 1, null, RegionMapInformation.RegionPosition.ROOT,-cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
   print("Quadtree Cutting End\n\n");
   
   //cutGridShow(outputImage, CUT_SIZE, color(25));
@@ -55,11 +55,11 @@ void setup(){
   color emityColor = color(10, 100, 30);
   color mixColor = color(200, 150, 20);
   color fullColor = color(128, 128, 128);
-  drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
+  //drawQuadtreeState(outputImage, _rootQuadtree, emityColor, mixColor, fullColor);
   
   // Draw region crosss line
   color crossColor = color(50);
-  drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor, 0.9);
+  //drawQuadtreeCuttingCrossLine(outputImage, _rootQuadtree, crossColor, 0.9);
   
   // Find Emity Region
   RegionMapInformation[] emityRegions = new RegionMapInformation[1024];
@@ -89,7 +89,10 @@ void setup(){
     //drawQuadtreeCuttingCrossLine(outputImage, emityRegions[i], crossColor, 0.0);
   }//end for
   
-  //outputImage.save(dataPath("quadtree_map_022.png"));
+  // Find path beween points
+  findPathBetweenPoints(outputImage, null, 0, 0, 50, 50);
+  
+  //outputImage.save(dataPath("quadtree_map_023.png"));
 }//end setup
 
 
@@ -99,21 +102,28 @@ void draw(){
 }
 
 
-void mousePressed(){
+
+/*
+void mouseMoved(){
   
   int pointX = (mouseX - IMAGE_WIDTH/2)/CUT_SIZE;
   int pointY = (mouseY - IMAGE_HEIGHT/2)/CUT_SIZE;
   
-  print("mouse point = (" + pointX + "," + pointY + ")\n");
+  //print("mouse point = (" + pointX + "," + pointY + ")\n");
   RegionMapInformation findIt = findRegionPoint( _rootQuadtree, pointX, pointY);
-  print("find region = " + findIt + "\n");
+  
   if(findIt != null){
     color emityColor = color(10, 100, 30);
     color mixColor = color(200, 150, 20);
     color fullColor = color(128, 128, 128);
-    drawQuadtreeCuttingArea(outputImage, findIt, emityColor, mixColor, fullColor);
+    //drawQuadtreeCuttingArea(outputImage, findIt, emityColor, mixColor, fullColor);
+    color crossColor = color(255,0,0);
+    drawQuadtreeCuttingCrossLine(outputImage, findIt, crossColor, 0.0);
+    print("find region = " + findIt +" LUPoint(" + findIt.getLUPointX() +","+findIt.getLUPointY()+") RDPoint("+findIt.getRDPointX()+","+findIt.getRDPointY()+ ") \n");
   }
 }
+*/
+
 
 
 RegionMapInformation findRegionPoint(RegionMapInformation _quadTree, int _pointX, int _pointY){
@@ -140,19 +150,72 @@ RegionMapInformation findRegionPoint(RegionMapInformation _quadTree, int _pointX
              return findRegionPoint(_quadTree.getRDRegion(), _pointX, _pointY);
            }
            
+           print("not found\n");
            return null;
          }
     }//end if
   }//end if
   
+  print("quadRree is null\n");
   return null;
 }//end findRegionPoint
 
 boolean inRegion(RegionMapInformation _region, int _pointX, int _pointY){
   if(_pointX >= _region.getLUPointX() && _pointX <= _region.getRDPointX() &&
      _pointY >= _region.getLUPointY() && _pointY <= _region.getRDPointY()){
-     return true;  
+     return true;
   }
    
   return false;
 }//end inRegion
+
+
+
+String findPathBetweenPoints(PImage _image, RegionMapInformation _region, int _point1X, int _point1Y, int _point2X, int _point2Y){
+  String result = "";
+  
+  //drawCuttingRegionPoint(_image, CUT_SIZE, _point1X, _point1Y, color(255,0,0));
+  //drawCuttingRegionPoint(_image, CUT_SIZE, _point2X, _point2Y, color(0,255,0));
+  
+  
+  return result;
+}
+
+
+
+RegionMapInformation exploreDirection(RegionMapInformation _region, int _direction){
+  RegionMapInformation result = null;
+  
+  if(_region==null) return null;
+  
+   switch(_direction){
+     case RegionMapInformation.Direction.LEFT:
+     
+       //Same Parent
+       if(_region.getRegionPosition() == RegionMapInformation.RegionPosition.RIGHT_UP){
+         return _region.getParentRegion().getLURegion();
+       }else if(_region.getRegionPosition() == RegionMapInformation.RegionPosition.RIGHT_DOWN){
+         return _region.getParentRegion().getLDRegion();
+       }
+       
+       if(result.isLeaf()){
+         return result;
+       }else{
+         result = result.LURegion;
+         result = result.LDRegion;
+       }
+       break;
+     case RegionMapInformation.Direction.RIGHT:
+       
+       break;
+     case RegionMapInformation.Direction.UP:
+     
+       break;
+     case RegionMapInformation.Direction.DOWN:
+       
+       break;
+     default:
+       break;
+   }
+  return result;
+}

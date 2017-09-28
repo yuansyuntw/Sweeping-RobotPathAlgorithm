@@ -3,6 +3,21 @@
 
 class RegionMapInformation{
   
+  public class Direction{
+    public final static int LEFT = 0;
+    public final static int RIGHT = 1;
+    public final static int UP = 2;
+    public final static int DOWN = 3;
+  }
+  
+  public class RegionPosition{
+    public final static int ROOT = -1;
+    public final static int LEFT_UP = 0;
+    public final static int RIGHT_UP = 1;
+    public final static int LEFT_DOWN = 2;
+    public final static int RIGHT_DOWN = 3;
+  }
+  
   public class RegionState{
     public final static int EMITY_OBSTACLE = 0;
     public final static int MIXED_OBSTACLE = 1;
@@ -22,7 +37,10 @@ class RegionMapInformation{
   private int STATE = RegionState.FULL_OBSTACLE;
   
   // Parent Region
-  RegionMapInformation parentRegion;
+  private RegionMapInformation parentRegion;
+  
+  // 
+  private int regionPosition = RegionPosition.ROOT;
   
   // Child Map
   private RegionMapInformation LURegion = null;
@@ -50,6 +68,8 @@ class RegionMapInformation{
   public void setParentRegion(RegionMapInformation _region){ parentRegion = _region; }
   public RegionMapInformation getParentRegion(){ return parentRegion; }
   
+  public int getRegionPosition(){ return regionPosition; }
+  
   public int getRegionWidth(){return (abs(RDPointX - LUPointX) + 1);}
   public int getRegionHeight(){return (abs(RDPointY - LUPointY) + 1);}
   public int getRegionArea(){ return(getRegionWidth() * getRegionHeight()); }
@@ -57,17 +77,17 @@ class RegionMapInformation{
   public boolean isLeaf(){ return ((LURegion==null)&&(RURegion==null)&&(LDRegion==null)&&(RDRegion==null)); }
   
   //Constructor
-  RegionMapInformation(int _state, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
+  RegionMapInformation(int _state, int _position , int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
     STATE = _state;
+    regionPosition = _position;
     LUPointX = _LUPointX;
     LUPointY = _LUPointY;
     RDPointX = _RDPointX;
     RDPointY = _RDPointY;
   }//end constructor
-  
-  
-  
 }//end Class
+
+
 
 int getStateRegions(RegionMapInformation _quadtree, RegionMapInformation [] _saveArray, int _state, int _index){
   int nextIndex = _index;
@@ -118,8 +138,10 @@ RegionMapInformation[] sortMaxAreaToMinArea(RegionMapInformation[] _saveArray, i
 
 
 
-RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutSize, int _originalLUPointX, int _originalLUPointY,
-                                  int _originalRDPointX, int _originalRDPointY, int _gridWidth, int _gridHeight){
+RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutSize, RegionMapInformation _parentRegion, int _regionPosition,  
+                                  int _originalLUPointX, int _originalLUPointY,
+                                  int _originalRDPointX, int _originalRDPointY,
+                                  int _gridWidth, int _gridHeight){
                                     
   RegionMapInformation resultMap;
   boolean DEBUG = false;
@@ -129,7 +151,7 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
   //Cutting size is small.
   if((_regionWidth/2 < _cutSize) || (_regionHeight/2 < _cutSize)){
     //return null;
-    resultMap = getRegionInformation(_mapArray, _gridWidth, _gridHeight,  _originalLUPointX,_originalLUPointY,_originalRDPointX,_originalRDPointY);
+    resultMap = getRegionInformation(_mapArray, _gridWidth, _gridHeight, _originalLUPointX,_originalLUPointY,_originalRDPointX,_originalRDPointY);
     return resultMap;
   }//end if
   
@@ -149,7 +171,7 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
   int LURegion_LUPointY = _originalLUPointY;
   int LURegion_RDPointX = _originalLUPointX + halfWidth - 1;
   int LURegion_RDPointY = _originalLUPointY + halfHeight - 1;
-  RegionMapInformation _LURegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight,  LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
+  RegionMapInformation _LURegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
   
   // Explore Right Up Region
   int RURegion_LUPointX = _originalLUPointX + halfWidth;
@@ -178,7 +200,7 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
       _LDRegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
       _RDRegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE){
         
-     resultMap =  new RegionMapInformation (RegionMapInformation.RegionState.EMITY_OBSTACLE,
+     resultMap =  new RegionMapInformation (RegionMapInformation.RegionState.EMITY_OBSTACLE, _regionPosition,
                                                 _originalLUPointX, _originalLUPointY,
                                                 _originalLUPointX + _regionWidth, _originalLUPointY + _regionHeight);
     
@@ -189,26 +211,29 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
       _LDRegion.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE &&
       _RDRegion.getRegionState() == RegionMapInformation.RegionState.FULL_OBSTACLE){
     
-      resultMap = new RegionMapInformation (RegionMapInformation.RegionState.FULL_OBSTACLE,
+      resultMap = new RegionMapInformation (RegionMapInformation.RegionState.FULL_OBSTACLE, _regionPosition,
                                                 _originalLUPointX, _originalLUPointY,
                                                 _originalLUPointX + _regionWidth, _originalLUPointY + _regionHeight);
     
   }else{
-    resultMap = new RegionMapInformation (RegionMapInformation.RegionState.MIXED_OBSTACLE,
+    resultMap = new RegionMapInformation (RegionMapInformation.RegionState.MIXED_OBSTACLE, _regionPosition,
                                                 _originalLUPointX, _originalLUPointY,
                                                 _originalLUPointX + _regionWidth, _originalLUPointY + _regionHeight);
-    resultMap.setLURegion(quadtreeCutting(_image, _mapArray, _cutSize, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY, _gridWidth, _gridHeight));
-    resultMap.setRURegion(quadtreeCutting(_image, _mapArray, _cutSize, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY, _gridWidth, _gridHeight));
-    resultMap.setLDRegion(quadtreeCutting(_image, _mapArray, _cutSize, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY, _gridWidth, _gridHeight));
-    resultMap.setRDRegion(quadtreeCutting(_image, _mapArray, _cutSize, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setLURegion(quadtreeCutting(_image, _mapArray, _cutSize, resultMap, RegionMapInformation.RegionPosition.LEFT_UP, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setRURegion(quadtreeCutting(_image, _mapArray, _cutSize, resultMap, RegionMapInformation.RegionPosition.RIGHT_UP, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setLDRegion(quadtreeCutting(_image, _mapArray, _cutSize, resultMap, RegionMapInformation.RegionPosition.LEFT_DOWN, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY, _gridWidth, _gridHeight));
+    resultMap.setRDRegion(quadtreeCutting(_image, _mapArray, _cutSize, resultMap, RegionMapInformation.RegionPosition.RIGHT_DOWN, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY, _gridWidth, _gridHeight));
   }//end if
+  
+  resultMap.setParentRegion(_parentRegion);
 
   return resultMap;
 }//end quadtreeCutting
 
 
 
-RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int _gridHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
+RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int _gridHeight,
+                                          int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
  
   switch(cutRectangleJudgment(_mapArray, _gridWidth, _gridHeight,_LUPointX, _LUPointY, _RDPointX, _RDPointY)){
     case RegionMapInformation.RegionState.EMITY_OBSTACLE:
