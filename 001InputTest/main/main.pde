@@ -191,12 +191,20 @@ RegionMapInformation exploreDirection(RegionMapInformation _region, int _directi
    switch(_direction){
      case RegionMapInformation.Direction.LEFT:
      
-       //Same Parent
-       if(_region.getRegionPosition() == RegionMapInformation.RegionPosition.RIGHT_UP){
-         return _region.getParentRegion().getLURegion();
-       }else if(_region.getRegionPosition() == RegionMapInformation.RegionPosition.RIGHT_DOWN){
-         return _region.getParentRegion().getLDRegion();
+       
+       
+       switch(_region.getRegionPosition()){
+         // Same Parent
+         case RegionMapInformation.RegionPosition.RIGHT_UP:
+           return _region.getParentRegion().getLURegion();
+
+         case RegionMapInformation.RegionPosition.RIGHT_DOWN:
+           return _region.getParentRegion().getLDRegion();
+         // Different parent
+         case RegionMapInformation.RegionPosition.LEFT_UP:
+           return _region.getParentRegion().getParentRegion();
        }
+
        
        if(result.isLeaf()){
          return result;

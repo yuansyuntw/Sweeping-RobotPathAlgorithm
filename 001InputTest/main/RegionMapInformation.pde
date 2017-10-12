@@ -16,6 +16,7 @@ class RegionMapInformation{
     public final static int RIGHT_UP = 1;
     public final static int LEFT_DOWN = 2;
     public final static int RIGHT_DOWN = 3;
+    public final static int ENTIRE = 4;
   }
   
   public class RegionState{
@@ -151,7 +152,10 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
   //Cutting size is small.
   if((_regionWidth/2 < _cutSize) || (_regionHeight/2 < _cutSize)){
     //return null;
-    resultMap = getRegionInformation(_mapArray, _gridWidth, _gridHeight, _originalLUPointX,_originalLUPointY,_originalRDPointX,_originalRDPointY);
+    resultMap = getRegionInformation(_mapArray,
+                                     _gridWidth, _gridHeight,
+                                     RegionMapInformation.RegionPosition.ENTIRE,
+                                     _originalLUPointX,_originalLUPointY,_originalRDPointX,_originalRDPointY);
     return resultMap;
   }//end if
   
@@ -171,28 +175,40 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
   int LURegion_LUPointY = _originalLUPointY;
   int LURegion_RDPointX = _originalLUPointX + halfWidth - 1;
   int LURegion_RDPointY = _originalLUPointY + halfHeight - 1;
-  RegionMapInformation _LURegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
+  RegionMapInformation _LURegion = getRegionInformation(_mapArray,
+                                                         _gridWidth, _gridHeight,
+                                                         RegionMapInformation.RegionPosition.LEFT_UP,
+                                                         LURegion_LUPointX, LURegion_LUPointY, LURegion_RDPointX, LURegion_RDPointY); 
   
   // Explore Right Up Region
   int RURegion_LUPointX = _originalLUPointX + halfWidth;
   int RURegion_LUPointY = _originalLUPointY;
   int RURegion_RDPointX = _originalLUPointX + _regionWidth - 1;
   int RURegion_RDPointY = _originalLUPointY + halfHeight - 1;
-  RegionMapInformation _RURegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY);
+  RegionMapInformation _RURegion = getRegionInformation(_mapArray, 
+                                                        _gridWidth, _gridHeight,
+                                                        RegionMapInformation.RegionPosition.RIGHT_UP,
+                                                        RURegion_LUPointX, RURegion_LUPointY, RURegion_RDPointX, RURegion_RDPointY);
   
   // Explore Left Down Region
   int LDRegion_LUPointX = _originalLUPointX;
   int LDRegion_LUPointY = _originalLUPointY + halfHeight;
   int LDRegion_RDPointX = _originalLUPointX + halfWidth - 1;
   int LDRegion_RDPointY = _originalLUPointY + _regionHeight - 1;
-  RegionMapInformation _LDRegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY);
+  RegionMapInformation _LDRegion = getRegionInformation(_mapArray, 
+                                                        _gridWidth, _gridHeight, 
+                                                        RegionMapInformation.RegionPosition.LEFT_DOWN,
+                                                        LDRegion_LUPointX, LDRegion_LUPointY, LDRegion_RDPointX, LDRegion_RDPointY);
   
   // Explore Right Down Region
   int RDRegion_LUPointX = _originalLUPointX + halfWidth;
   int RDRegion_LUPointY = _originalLUPointY + halfHeight;
   int RDRegion_RDPointX = _originalLUPointX + _regionWidth - 1;
   int RDRegion_RDPointY = _originalLUPointY + _regionHeight - 1;
-  RegionMapInformation _RDRegion = getRegionInformation(_mapArray, _gridWidth, _gridHeight, RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
+  RegionMapInformation _RDRegion = getRegionInformation(_mapArray, 
+                                                        _gridWidth, _gridHeight, 
+                                                        RegionMapInformation.RegionPosition.RIGHT_DOWN,
+                                                        RDRegion_LUPointX, RDRegion_LUPointY, RDRegion_RDPointX, RDRegion_RDPointY);
 
   // Determine whether the sub-region is empty-obstacle
   if(_LURegion.getRegionState() == RegionMapInformation.RegionState.EMITY_OBSTACLE && 
@@ -232,23 +248,26 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
 
 
 
-RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int _gridHeight,
+RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int _gridHeight, int _position,
                                           int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
  
   switch(cutRectangleJudgment(_mapArray, _gridWidth, _gridHeight,_LUPointX, _LUPointY, _RDPointX, _RDPointY)){
     case RegionMapInformation.RegionState.EMITY_OBSTACLE:
         // Return emity obstacle region information
-        return new RegionMapInformation(RegionMapInformation.RegionState.EMITY_OBSTACLE,
+        return new RegionMapInformation(RegionMapInformation.RegionState.EMITY_OBSTACLE, 
+                                          _position,
                                           _LUPointX, _LUPointY,
                                           _RDPointX, _RDPointY);
     case RegionMapInformation.RegionState.FULL_OBSTACLE:
         // Return full obstacle region information
         return new RegionMapInformation(RegionMapInformation.RegionState.FULL_OBSTACLE,
+                                         _position,
                                          _LUPointX, _LUPointY,
                                         _RDPointX, _RDPointY);
     case RegionMapInformation.RegionState.MIXED_OBSTACLE:                  
         // Return mixed obstacle region information
         return new RegionMapInformation(RegionMapInformation.RegionState.MIXED_OBSTACLE,
+                                        _position,
                                         _LUPointX, _LUPointY,
                                         _RDPointX, _RDPointY);
     default:
