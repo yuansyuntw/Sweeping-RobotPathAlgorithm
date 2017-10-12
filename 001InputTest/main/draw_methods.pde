@@ -1,4 +1,5 @@
 
+//------------------------------------------------------------------------------------------
 void drawCrossLine(PImage _image, int _pointX, int _pointY, color _color){
   for(int i=0; i < _image.width; i++){
     //Vertical Line
@@ -10,16 +11,12 @@ void drawCrossLine(PImage _image, int _pointX, int _pointY, color _color){
   _image.updatePixels();
 }//end draw Point
 
-
-
-
+//------------------------------------------------------------------------------------------
 void drawLine(int _pointX1,int _pointY1, int _pointX2, int _pointY2){
   line(_pointX1+(IMAGE_WIDTH/2), _pointY1+(IMAGE_HEIGHT/2), _pointX2+(IMAGE_WIDTH/2), _pointY2+(IMAGE_HEIGHT/2));
 }
 
-
-
-
+//------------------------------------------------------------------------------------------
 void drawRegion(PImage _image, int _point1X, int _point1Y, int _point2X, int _point2Y, color _color){
   int _width = _point2X - _point1X;
   int _height = _point2Y - _point1Y;
@@ -54,8 +51,7 @@ void drawRegion(PImage _image, int _point1X, int _point1Y, int _point2X, int _po
   _image.updatePixels();
 }//end drawRegion
 
-
-
+//------------------------------------------------------------------------------------------
 void drawCuttingRegionPoint(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LUPointX = _cutSize*_cutPointX - _cutSize/2;
   int LUPointY = _cutSize*_cutPointY - _cutSize/2;
@@ -66,8 +62,7 @@ void drawCuttingRegionPoint(PImage _image, int _cutSize, int _cutPointX, int _cu
    drawRegion(_image, LUPointX, LUPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingPoint
 
-
-
+//------------------------------------------------------------------------------------------
 void drawCuttingRegionPointRight(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int RUPointX = _cutSize*_cutPointX + _cutSize/2;
   int RUPointY = _cutSize*_cutPointY - _cutSize/2;
@@ -77,8 +72,7 @@ void drawCuttingRegionPointRight(PImage _image, int _cutSize, int _cutPointX, in
   drawRegion(_image, RUPointX, RUPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingRegionPointRight
 
-
-
+//------------------------------------------------------------------------------------------
 void drawCuttingRegionPointDown(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LDPointX = _cutSize*_cutPointX - _cutSize/2;
   int LDPointY = _cutSize*_cutPointY + _cutSize/2;
@@ -88,8 +82,7 @@ void drawCuttingRegionPointDown(PImage _image, int _cutSize, int _cutPointX, int
   drawRegion(_image, LDPointX, LDPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingRegionPointDown
 
-
-
+//------------------------------------------------------------------------------------------
 void drawCuttingRegionPointCenterVertical(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LDPointX = _cutSize*_cutPointX;
   int LDPointY = _cutSize*_cutPointY - _cutSize/2;
@@ -99,8 +92,7 @@ void drawCuttingRegionPointCenterVertical(PImage _image, int _cutSize, int _cutP
   drawRegion(_image, LDPointX, LDPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingRegionPointCenterVertical
 
-
-
+//------------------------------------------------------------------------------------------
 void drawCuttingRegionPointCenterHorizontal(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LDPointX = _cutSize*_cutPointX - _cutSize/2;
   int LDPointY = _cutSize*_cutPointY;
@@ -110,8 +102,7 @@ void drawCuttingRegionPointCenterHorizontal(PImage _image, int _cutSize, int _cu
   drawRegion(_image, LDPointX, LDPointY, RDPointX, RDPointY, _color);
 }//end drawCuttingRegionPointCenterHorizontal
 
-
-
+//------------------------------------------------------------------------------------------
 void cutGridShow(PImage _image, int _cutSize, color _color){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
   int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
@@ -152,8 +143,7 @@ void cutGridShow(PImage _image, int _cutSize, color _color){
   }
 }//end cutGridShow
 
-
-
+//------------------------------------------------------------------------------------------
 void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color _emityColor, color _mixColor, color _fullColor){
 
   color _decisionColor;
@@ -228,8 +218,7 @@ void drawQuadtreeCuttingArea(PImage _image, RegionMapInformation _region, color 
 
 }//end drawIctreeCuttingArea
 
-
-
+//------------------------------------------------------------------------------------------
 void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, color _color, float _colorRatio){
   
   if(_region!=null){
@@ -333,8 +322,7 @@ void drawQuadtreeCuttingCrossLine(PImage _image, RegionMapInformation _region, c
   
 }//end frawQtreeCuttinCrossLine
 
-
-
+//------------------------------------------------------------------------------------------
 void drawQuadtreeState(PImage _image, RegionMapInformation _quadtree, color _emityColor, color _mixColor, color _fullColor){
   
   if(_quadtree != null){

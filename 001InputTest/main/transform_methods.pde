@@ -1,4 +1,5 @@
 
+//------------------------------------------------------------------------------------------
 int coordinateToImageIndex(PImage _image, int _pointX, int _pointY){
   //print("point = (" + _pointX + "," + _pointY + ") ");
   return ( _image.width*(_pointY + _image.height/2 ) + (_pointX + _image.width/2 ));

@@ -1,6 +1,5 @@
 
-
-
+//------------------------------------------------------------------------------------------
 float rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY, color _color){
   int obstacleNumber = 0;
   int _width = _RDPointX - _LUPointX;
@@ -27,8 +26,7 @@ float rectangleJudgment(PImage _image, int _LUPointX, int _LUPointY, int _RDPoin
   return ( float(obstacleNumber) / (abs(_height)*abs(_width)) );
 }//end rectangleJudgment
 
-
-
+//------------------------------------------------------------------------------------------
 float cutRegionPointJudgment(PImage _image, int _cutSize, int _cutPointX, int _cutPointY, color _color){
   int LRPointX = _cutSize*_cutPointX - _cutSize/2;
   int LRPointY = _cutSize*_cutPointY - _cutSize/2;
@@ -42,8 +40,7 @@ float cutRegionPointJudgment(PImage _image, int _cutSize, int _cutPointX, int _c
   
 }//end cutRegionJudgment
 
-
-
+//------------------------------------------------------------------------------------------
 float[] getImageGridArray(PImage _image, int _cutSize,color _color){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
   int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
@@ -74,8 +71,7 @@ float[] getImageGridArray(PImage _image, int _cutSize,color _color){
   return gridArray;
 }//end getImageGridArray
 
-
-
+//------------------------------------------------------------------------------------------
 int getImageGridWidth(PImage _image, int _cutSize){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
   int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
@@ -83,8 +79,7 @@ int getImageGridWidth(PImage _image, int _cutSize){
   return (endIndexWidth - startIndexWidth + 1);
 }
 
-
-
+//------------------------------------------------------------------------------------------
 int getImageGridHeight(PImage _image, int _cutSize){
   int startIndexHeight = -1 * (((_image.height/2)-(_cutSize/2))/_cutSize);
   int endIndexHeight = (((_image.height/2)-(_cutSize/2))/_cutSize);
@@ -92,8 +87,7 @@ int getImageGridHeight(PImage _image, int _cutSize){
   return (endIndexHeight - startIndexHeight + 1);
 }
 
-
-
+//------------------------------------------------------------------------------------------
 void findVertex(PImage _image, int _cutSize, boolean[] _cutMap){
   int startIndexWidth = -1 * (((_image.width/2)-(_cutSize/2))/_cutSize);
   int endIndexWidth = (((_image.width/2)-(_cutSize/2))/_cutSize);
@@ -135,8 +129,7 @@ void findVertex(PImage _image, int _cutSize, boolean[] _cutMap){
   
 }//end findVertex
 
-
-
+//------------------------------------------------------------------------------------------
 int cutRectangleJudgment(float[] _mapArray, int _gridWidth, int _gridHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
   boolean DEBUG = false;
   

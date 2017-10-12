@@ -1,6 +1,5 @@
 
-
-
+//------------------------------------------------------------------------------------------
 class RegionMapInformation{
   
   public class RegionState{
@@ -65,10 +64,9 @@ class RegionMapInformation{
     RDPointY = _RDPointY;
   }//end constructor
   
-  
-  
 }//end Class
 
+//------------------------------------------------------------------------------------------
 int getStateRegions(RegionMapInformation _quadtree, RegionMapInformation [] _saveArray, int _state, int _index){
   int nextIndex = _index;
   
@@ -88,8 +86,7 @@ int getStateRegions(RegionMapInformation _quadtree, RegionMapInformation [] _sav
   return nextIndex;
 }//end getStateRegions
 
-
-
+//------------------------------------------------------------------------------------------
 RegionMapInformation[] sortMaxAreaToMinArea(RegionMapInformation[] _saveArray, int maxIndex){
  RegionMapInformation tempRegion; 
  int maxRegionIndex;
@@ -116,8 +113,7 @@ RegionMapInformation[] sortMaxAreaToMinArea(RegionMapInformation[] _saveArray, i
  return _saveArray;
 }//end sortMaxAreaToMinArea
 
-
-
+//------------------------------------------------------------------------------------------
 RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutSize, int _originalLUPointX, int _originalLUPointY,
                                   int _originalRDPointX, int _originalRDPointY, int _gridWidth, int _gridHeight){
                                     
@@ -206,8 +202,7 @@ RegionMapInformation quadtreeCutting(PImage _image, float[] _mapArray, int _cutS
   return resultMap;
 }//end quadtreeCutting
 
-
-
+//------------------------------------------------------------------------------------------
 RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int _gridHeight, int _LUPointX, int _LUPointY, int _RDPointX, int _RDPointY){
  
   switch(cutRectangleJudgment(_mapArray, _gridWidth, _gridHeight,_LUPointX, _LUPointY, _RDPointX, _RDPointY)){
@@ -230,3 +225,94 @@ RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int
         return null;
   }//end switch
 }//end checkRegion
+
+//------------------------------------------------------------------------------------------
+RegionMapInformation findRegionPoint(RegionMapInformation _quadTree, int _pointX, int _pointY){
+  if(_quadTree != null){
+    
+    if(inRegion(_quadTree, _pointX, _pointY)){
+         
+         if(_quadTree.isLeaf()){
+           return _quadTree;
+         }else{
+           if(inRegion(_quadTree.getLURegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getLURegion(), _pointX, _pointY);
+           }
+           
+           if(inRegion(_quadTree.getRURegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getRURegion(), _pointX, _pointY);
+           }
+           
+           if(inRegion(_quadTree.getLDRegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getLDRegion(), _pointX, _pointY);
+           }
+           
+           if(inRegion(_quadTree.getRDRegion(), _pointX, _pointY)){
+             return findRegionPoint(_quadTree.getRDRegion(), _pointX, _pointY);
+           }
+           
+           return null;
+         }
+    }//end if
+  }//end if
+  
+  return null;
+}//end findRegionPoint
+
+//------------------------------------------------------------------------------------------
+boolean inRegion(RegionMapInformation _region, int _pointX, int _pointY){
+  if(_pointX >= _region.getLUPointX() && _pointX <= _region.getRDPointX() &&
+     _pointY >= _region.getLUPointY() && _pointY <= _region.getRDPointY()){
+     return true;  
+  }
+   
+  return false;
+}//end inRegion
+
+//------------------------------------------------------------------------------------------
+boolean [] grabPoints(RegionMapInformation[] _regions, int _arrayWidth, int _arrayHeight){
+  boolean []result = new boolean[_arrayWidth * _arrayHeight];
+  
+  //Check region is or not is null
+  if(_regions.length == 0){
+    result = new boolean[1];
+    result[0] = false;
+    return result;
+  }//end if
+  
+  for(int i=0;i<_regions.length;i++){
+    
+    if(_regions[i]!=null){
+      print("this is region[" + i +"]\n");
+      
+      int selectX = _regions[i].LUPointX;
+      int selectY = _regions[i].LUPointY;
+      
+      int indexX;
+      if(_regions[i].LUPointX - _regions[i].RDPointX > 0){
+        indexX = -1; //reverse
+      }else{
+        indexX = 1;
+      }
+      int indexY;
+      if(_regions[i].LUPointY - _regions[i].RDPointY > 0){
+        indexY = -1; //reverse
+      }else{
+        indexY = 1;
+      }
+      
+      
+      //print("selectX = " + (selectX+_arrayWidth/2) + ", selectY = " + (selectY+_arrayHeight/2) +"\n");
+      
+      for(int j=0; j<_regions[i].getRegionHeight(); j++){
+        for(int k=0; k<_regions[i].getRegionWidth(); k++){
+          result[(selectX+_arrayWidth/2) +(selectY+_arrayHeight/2)*_arrayWidth] = true;
+          selectX += indexX;
+        }
+        selectY += indexY;
+      }//end for
+    }//end if
+  }//end for
+  
+  return result;
+}//end grabPoints
