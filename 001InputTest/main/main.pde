@@ -115,7 +115,7 @@ void setup(){
   print("\n\n");
   
   
-  //outputImage.save(dataPath("quadtree_map_023.png"));
+  outputImage.save(dataPath("quadtree_map_024.png"));
 }//end setup
 
 
