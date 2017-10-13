@@ -283,7 +283,7 @@ boolean [] grabPoints(RegionMapInformation[] _regions, int _arrayWidth, int _arr
   for(int i=0;i<_regions.length;i++){
     
     if(_regions[i]!=null){
-      print("this is region[" + i +"]\n");
+      //print("this is region[" + i +"]\n");
       
       int selectX = _regions[i].LUPointX;
       int selectY = _regions[i].LUPointY;
