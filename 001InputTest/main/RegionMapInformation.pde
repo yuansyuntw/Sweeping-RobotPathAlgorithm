@@ -288,6 +288,8 @@ boolean [] grabPoints(RegionMapInformation[] _regions, int _arrayWidth, int _arr
       int selectX = _regions[i].LUPointX;
       int selectY = _regions[i].LUPointY;
       
+      int originalX = selectX;
+      
       int indexX;
       if(_regions[i].LUPointX - _regions[i].RDPointX > 0){
         indexX = -1; //reverse
@@ -301,14 +303,15 @@ boolean [] grabPoints(RegionMapInformation[] _regions, int _arrayWidth, int _arr
         indexY = 1;
       }
       
-      
-      //print("selectX = " + (selectX+_arrayWidth/2) + ", selectY = " + (selectY+_arrayHeight/2) +"\n");
-      
+      //print("test selectX = " + (_arrayWidth/2 - 0) + ", selectY = " + (_arrayHeight/2 - 0) +"\n");
+
+      //result array default value is fasle. This is set to true;
       for(int j=0; j<_regions[i].getRegionHeight(); j++){
         for(int k=0; k<_regions[i].getRegionWidth(); k++){
-          result[(selectX+_arrayWidth/2) +(selectY+_arrayHeight/2)*_arrayWidth] = true;
+          result[(_arrayWidth/2 + selectX) +(_arrayHeight/2 + selectY)*_arrayWidth] = true;
           selectX += indexX;
         }
+        selectX = originalX;
         selectY += indexY;
       }//end for
     }//end if
