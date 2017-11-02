@@ -89,23 +89,13 @@ void setup(){
       //print("Color Ratio = " + colorRatio +"\n");
     }
     
-    //drawQuadtreeCuttingArea(outputImage, emityRegions[i], int(emityColor*colorRatio), int(mixColor*colorRatio), int(fullColor*colorRatio));
+    drawQuadtreeCuttingArea(outputImage, emityRegions[i], int(emityColor*colorRatio), int(mixColor*colorRatio), int(fullColor*colorRatio));
     //drawQuadtreeCuttingCrossLine(outputImage, emityRegions[i], crossColor, 0.0);
   }//end for
-  
-  
+
+  /*
   // RegionInformation transform to two-dimension array.
   map = grabPoints(emityRegions, cutWidth, cutHeight);
-  int x = 0;
-  int y = 0;
-  for(int i=0; i<map.length; i++){
-    if(map[i]){
-      x = i%cutWidth - cutWidth/2;
-      y = i/cutWidth - cutHeight/2;
-      //print("["+i+"] = (" + cycle_pathing[i][0] + "," + cycle_pathing[i][1] + ") \n");
-      //drawCuttingRegionPoint(outputImage, CUT_SIZE, x, y, color(255, 255,0));
-    }
-  }//end for
   
   // find path with greed methos
   int startX = 0;
@@ -118,6 +108,12 @@ void setup(){
     drawCuttingRegionPoint(outputImage, CUT_SIZE, cycle_pathing[i][0], cycle_pathing[i][1], color(-65536-(i*100)));
   }
   print("\n\n");
+  */
+  
+  //Create path tree
+  
+  
+  
   
   //cutGridShow(outputImage, CUT_SIZE, color(25));
   //outputImage.save(dataPath("quadtree_map_027.png"));
@@ -158,100 +154,15 @@ void mousePressed(){
 }
 
 //------------------------------------------------------------------------------------------
-int[][] cyclePath(boolean[] _map,int _mapWidth, int _mapHeight, int _startPoint){
-  //Copy array.
-  boolean[] _pathMap = new boolean[_map.length];
-  int[] backPoints = new int[_map.length];
-  for(int i=0;i<_pathMap.length;i++){
-    _pathMap[i] = _map[i];
-    backPoints[i] = 0;
+void createConnectTree(RegionMapInformation _map, int _startX, int _startY){
+  RegionMapInformation selectRegion = findRegionPoint( _map, _startX, _startY);
+  
+  //Start Point is not region area.
+  if( selectRegion == null) return;
+  
+  //Explore the top.
+  
+  for(int i=0;i<selectRegion.getRegionWidth();i++){
+    
   }
-  
-  int resultSize = 9999;
-  int [][]result = new int[resultSize][2];
-  int pathCounter = 1;
-  
-  int selectPoint = _startPoint;
-  backPoints[_startPoint] = -1;
-  
-  
-  //print("_map length = "+_map.length+"\n");
-  
-  //Save start point.
-  _pathMap[selectPoint] = false;
-  //Save point x.
-  result[pathCounter][0] = selectPoint%_mapWidth - _mapWidth/2;
-  //Save point y.
-  result[pathCounter][1] = selectPoint/_mapWidth - _mapHeight/2;
-  print("["+pathCounter+"] = (" + result[pathCounter][0]+","+result[pathCounter][1]+") start\n");
-  pathCounter += 1;
-  
-  
-  
-  //This is dfs.
-  while(true){
-    
-    // right, down, left and up is cycle order.
-    if(readArray(_pathMap, selectPoint+1)){
-      //right
-      backPoints[selectPoint+1] = selectPoint;
-      selectPoint += 1;
-      //backPathCounter = 0;
-    }else if(readArray(_pathMap, selectPoint+_mapWidth)){
-      //down
-      backPoints[selectPoint+_mapWidth] = selectPoint;
-      selectPoint += _mapWidth;
-      //backPathCounter = 0;
-    }else if(readArray(_pathMap, selectPoint-1)){
-      //left
-      backPoints[selectPoint-1] = selectPoint;
-      selectPoint -= 1;
-      //backPathCounter = 0;
-    }else if(readArray(_pathMap, selectPoint-_mapWidth)){
-      //up
-      backPoints[selectPoint-_mapWidth] = selectPoint;
-      selectPoint -= _mapWidth;
-      //backPathCounter = 0;
-    }else {
-      
-      //Back postion
-      selectPoint = backPoints[selectPoint]; 
-      if(selectPoint==-1) break;//Back to start Point.
-      //Save point x.
-      result[pathCounter][0] = selectPoint%_mapWidth - _mapWidth/2;
-      //Save point y.
-      result[pathCounter][1] = selectPoint/_mapWidth - _mapHeight/2;
-      print("["+pathCounter+"] = (" + result[pathCounter][0]+","+result[pathCounter][1] + ")\n");
-      pathCounter += 1;
-      continue;
-    }//end if
-    
-    if(pathCounter >= resultSize) break;
-    
-    //print("Select point = " + selectPoint + " pathCounter = " + pathCounter + "\n");
-    _pathMap[selectPoint] = false;
-    //Save point x.
-    result[pathCounter][0] = selectPoint%_mapWidth - _mapWidth/2;
-    //Save point y.
-    result[pathCounter][1] = selectPoint/_mapWidth - _mapHeight/2;
-    print("["+pathCounter+"] = (" + result[pathCounter][0]+","+result[pathCounter][1]+") forward \n");
-    pathCounter += 1;
-    
-    if(selectPoint == _startPoint) break;
-  }//end while
-  
-  //Save path counter.
-  result[0][0] = pathCounter;
-  
-  return result;
-}//end cyclePath
-
-//------------------------------------------------------------------------------------------
-boolean readArray(boolean[] _array, int _index){
-  
-  if((_index>=0)&&(_index<_array.length)){
-    return _array[_index];
-  }
-  
-  return false;
-}//end readAttay
+}
