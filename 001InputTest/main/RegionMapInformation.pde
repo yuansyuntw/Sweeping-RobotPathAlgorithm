@@ -23,6 +23,9 @@ class RegionMapInformation{
   // Parent Region
   RegionMapInformation parentRegion;
   
+  // COnection Region
+  ConnectionInformation[] connectRegions;
+  
   // Child Map
   private RegionMapInformation LURegion = null;
   private RegionMapInformation RURegion = null;
@@ -49,6 +52,9 @@ class RegionMapInformation{
   public void setParentRegion(RegionMapInformation _region){ parentRegion = _region; }
   public RegionMapInformation getParentRegion(){ return parentRegion; }
   
+  public void setConnectionRegion(ConnectionInformation[] _connectInfos){ connectRegions = _connectInfos; }
+  public ConnectionInformation[] getConnectionRegions(){ return connectRegions; }
+  
   public int getRegionWidth(){return (abs(RDPointX - LUPointX) + 1);}
   public int getRegionHeight(){return (abs(RDPointY - LUPointY) + 1);}
   public int getRegionArea(){ return(getRegionWidth() * getRegionHeight()); }
@@ -69,6 +75,8 @@ class RegionMapInformation{
 //------------------------------------------------------------------------------------------
 int getStateRegions(RegionMapInformation _quadtree, RegionMapInformation [] _saveArray, int _state, int _index){
   int nextIndex = _index;
+  
+  if(_quadtree==null) return nextIndex;
   
   if(_quadtree.isLeaf()){
    if(_quadtree.getRegionState() == _state){
