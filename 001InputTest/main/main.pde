@@ -1,10 +1,13 @@
 /*
-    Purpose: Solve sweeping robot path planning.
     Coder: YuanSyun(yuansyuntw@gmail.com)
     Date: 2017/08
+    Purpose: Solve sweeping robot path planning.
+    
 */
 
 //------------------------------------------------------------------------------------------
+import java.util.*;
+
 PImage inputImage;
 PImage outputImage;
 //String IMAGE_PATH = "data/Test_Image.tif";
@@ -112,9 +115,14 @@ void setup(){
   //Create path tree
   connectRegions(_rootQuadtree, emityRegions);
   
-  color connectRegionColor = color(200);
-  color selectRegionColor = color(255, 128, 0);
+  /*
+  color connectRegionColor = color(200, 0, 0);
+  color selectRegionColor = color(0, 0, 200);
   drawConnectRegions(emityRegions, selectRegionColor, connectRegionColor);
+  */
+  
+  getPrimSpinningTree(_rootQuadtree, 0, 0);
+  
   
   //cutGridShow(outputImage, CUT_SIZE, color(25));
   //outputImage.save(dataPath("quadtree_map_032.png"));
@@ -157,127 +165,136 @@ void mousePressed(){
   
 }
 
-//------------------------------------------------------------------------------------------
-RegionMapInformation createConnectRegion(RegionMapInformation _map, int _startX, int _startY, int _state){
-  RegionMapInformation selectRegion = findRegionPoint( _map, _startX, _startY);
-  
-  //Start Point is not region area.
-  if(selectRegion == null) return null;
-  
-  if(selectRegion.getRegionState() != _state) return selectRegion;
-  
-  ConnectionInformation[] connectArray = new ConnectionInformation[selectRegion.getRegionWidth()*2 + selectRegion.getRegionHeight()*2];
-  int connectIndex = 0;
-  
-  int selectX;
-  int selectY;
-  RegionMapInformation findRightRegion, findTopRegion, findDownRegion, findLeftRegion;
-  
-  //Explore the top and down.
-  selectX = selectRegion.getLUPointX();
-  selectY = selectRegion.getLUPointY();
-  //print("select point = ("+selectX+","+selectY+")\n");
-  for(int i=0;i<selectRegion.getRegionWidth();i++){
-    findTopRegion = findRegionPoint(_map, selectX+i,selectY-1);
-    //print("find point = ("+(selectX+i)+","+(selectY-1)+") = "+ findTopRegion+"\n");
-    findDownRegion = findRegionPoint(_map, selectX+i, selectY + selectRegion.getRegionHeight()+1);
-    //print("find point = ("+(selectX+i)+","+(selectY + selectRegion.getRegionHeight()+1)+") = "+ findDownRegion+"\n");
+/*------------------------------------------------------------------------------------------
+  Purpose: 
+    Get a staet point, and return a region map tree. For minimum spanning tree.
     
-    if((findTopRegion != null)&&(findTopRegion.getRegionState() == _state)){
-      connectArray[connectIndex] = new ConnectionInformation(findTopRegion, findTopRegion.getRegionArea(), selectX+i, selectY);
-      connectIndex += 1;
-    }//end if
-    if((findDownRegion != null&&(findDownRegion.getRegionState() == _state))){
-      connectArray[connectIndex] = new ConnectionInformation(findDownRegion, findDownRegion.getRegionArea(), selectX+i, selectY + selectRegion.getRegionHeight());
-      connectIndex += 1;
-    }//end if
-  }//end for
-  
-  //Explore the top and down.
-  selectX = selectRegion.getLUPointX();
-  selectY = selectRegion.getLUPointY();
-  for(int i=0;i<selectRegion.getRegionHeight();i++){
-    findLeftRegion = findRegionPoint(_map, selectX-1,selectY+i);
-    //print("find point = ("+(selectX-1)+","+(selectY+i)+") = "+ findLeftRegion+"\n");
-    findRightRegion = findRegionPoint(_map, selectX+selectRegion.getRegionWidth()+1, selectY+i);
-    //print("find point = ("+(selectX+selectRegion.getRegionWidth()+1)+","+(selectY+i)+") = "+ findRightRegion+"\n");
+  Parameter:
+    _root = QuadTree map.
+    _rootX = Start Point X.
+    _rootY = Start Point Y. 
     
-    if((findLeftRegion != null)&&(findLeftRegion.getRegionState() == _state)){
-      connectArray[connectIndex] = new ConnectionInformation(findLeftRegion, findLeftRegion.getRegionArea(), selectX, selectY+i);
-      connectIndex += 1;
-    }//end if
-    if((findRightRegion != null)&&(findRightRegion.getRegionState() == _state)){
-      connectArray[connectIndex] = new ConnectionInformation(findRightRegion, findRightRegion.getRegionArea(), selectX+selectRegion.getRegionWidth(), selectY+i);
-      connectIndex += 1;
-    }//end if
-  }//end for
+  Return:
+    void
+*/
+void getPrimSpinningTree(RegionMapInformation _root, int _rootX, int _rootY){
   
-  selectRegion.setConnectionRegion(connectArray);
-  return selectRegion;
+  List<RegionMapInformation> vieweds = new ArrayList<RegionMapInformation>();
+  
+  List<ConnectionInformation> weights = new ArrayList<ConnectionInformation>();
+  
+  RegionMapInformation findIt = findRegionPoint(_root, _rootX, _rootY);
+  
+  while(true){
+    if(findIt!=null){
+      vieweds.add(findIt);
+      AddConnectInformations(weights, findIt);
+      findIt = getMinWeightRegion(vieweds, weights);
+    }else{
+      break;
+    }
+  }
+  
+  print("getPrimSpinninggtree() complete.\n");
+  for(int i=0;i<weights.size();i++){
+    print("O = " + weights.get(i).getOriginalRegion() + ", C = " + weights.get(i).getConnectRegion()+"\n");
+  }
+
+  return ;
 }
 
 //------------------------------------------------------------------------------------------
-void drawConnectRegion(RegionMapInformation _region, int _state, color _selectColor, color _connectColor){
+/*
+  Purpose:
+    Add connect region to input array.
+    
+  Parameter:
+    _weightsArray = Attached array.
+    _index = Attached array index.
+    _region =   Join the content.
+    
+  Return:
+    New attached array index. 
+*/
+void AddConnectInformations(List<ConnectionInformation> _weights, RegionMapInformation _region){
   
-  if(_region == null) return;
-  
-  //It is not want region state.
-  if(_region.getRegionState() !=_state) return;
-  
-  color mixColor = color(255,0,0);
-  color fullColor = color(0,255,0);
-  
-  ConnectionInformation[] connectRegions = _region.getConnectionRegions();
-  if((connectRegions != null) &&(connectRegions.length>0)){
-    //print("connect regions number = "+connectRegions.length+"\n");
-    for(int i=0;i<connectRegions.length;i++){
-      if(connectRegions[i]!=null){
-        drawQuadtreeCuttingArea(outputImage, connectRegions[i].getConnectRegion(), _connectColor, mixColor, fullColor);
-      }
+  //Check input data
+  if((_region != null)&&(_weights!=null)){
+    print("region addres = " + _region+"\n");
+    print("weights address = " + _weights.size()+"\n");
+    print("region connect region = " + _region.getConnectionRegions()+"\n");
+    for(int i=0;i<_region.getConnectionRegions().length;i++){
+      _weights.add(_region.getConnectionRegions()[i]);
     }
+  }
+  
+}
+
+/*------------------------------------------------------------------------------------------
+  Purpose:
+    Return thre area with the least weight and will not create a loop.
+    
+  Parameter:
+    _weights = Weight region array.
+    
+  Return:
+    min region weight.
+*/
+RegionMapInformation getMinWeightRegion(List<RegionMapInformation> _vieweds, List<ConnectionInformation> _weights){
+  RegionMapInformation result = null;
+
+  if(_weights.size()>0){
+    
+    //Find min weights,
+    int minWeight = _weights.get(0).getWeight();
+    int minWeightIndex = 0;
+    while(true){
+    
+      for(int i=0;i<_weights.size();i++){
+        if(_weights.get(i).getWeight() < minWeight){
+          minWeightIndex = i;
+          minWeight = _weights.get(i).getWeight();
+        }
+      }//end for
+    
+      //Check add it, wether will cause loop.
+      if(checkCycle(_vieweds, _weights.get(minWeightIndex).getConnectRegion())){
+        
+        //Refind.
+        minWeight=_weights.get(minWeightIndex).getWeight();
+        
+      }else{
+        
+        //Find it.
+        result = _weights.get(minWeightIndex).getConnectRegion();
+        break;
+        
+      }//end if
+      
+    }//end while
   }//end if
   
-  drawQuadtreeCuttingArea(outputImage, _region, _selectColor, mixColor, fullColor);
+  return result;
 }
 
-//------------------------------------------------------------------------------------------
-void drawConnectRegions(RegionMapInformation[] _regions, color _selectColor, color _connectColor){
+/*------------------------------------------------------------------------------------------
+  Purpose:
+    Check if adding leads to a loop.
+    
+  Parameter:
+    _viewed = Explored area.
+    _region = Join the area.
+    
+  Return:
+    Whether to create a loop.
+*/
+boolean checkCycle(List<RegionMapInformation> _vieweds, RegionMapInformation _region){
+  boolean result = true;
   
-  if(_regions.length<=0) return;
-  
-  int state = _regions[0].getRegionState();
-  
-  print("regions = " + _regions.length+"\n");
-  for(int i=0;i<_regions.length;i++){
-    drawConnectRegion(_regions[i], state,_selectColor, _connectColor);
-  }
-}
-
-//------------------------------------------------------------------------------------------
-void connectRegions(RegionMapInformation _rootRegion, RegionMapInformation[] _regions){
-  
-  if(_regions.length<=0) return;
-  
-  //connect same state.
-  int State = _regions[0].getRegionState();
-  
-  print("regions = " + _regions.length+"\n");
-  for(int i=0;i<_regions.length;i++){
-    //Create path tree
-    createConnectRegion(_rootRegion, _regions[i].getLUPointX(), _regions[i].getLUPointY(), State);
-  }
-}
-
-//------------------------------------------------------------------------------------------
-RegionMapInformation[] getStateRegions(RegionMapInformation _rootReegion, int _state){ 
-  // Find Emity Region
-  RegionMapInformation[] tempRegions = new RegionMapInformation[1024];
-  int regionsNumber = getStateRegions(_rootReegion, tempRegions, _state, 0);
-  
-  RegionMapInformation[] resultRegions = new RegionMapInformation[regionsNumber];
-  for(int i=0;i<regionsNumber;i++){
-    resultRegions[i] = tempRegions[i];
+  if((_region!=null)&&(_vieweds.indexOf(_region)!=-1)){
+    
+    result = false;
   }
   
-  return resultRegions;
+  return result;
 }

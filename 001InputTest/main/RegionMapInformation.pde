@@ -327,3 +327,32 @@ boolean [] grabPoints(RegionMapInformation[] _regions, int _arrayWidth, int _arr
   
   return result;
 }//end grabPoints
+
+//------------------------------------------------------------------------------------------
+void connectRegions(RegionMapInformation _rootRegion, RegionMapInformation[] _regions){
+  
+  if(_regions.length<=0) return;
+  
+  //connect same state.
+  int State = _regions[0].getRegionState();
+  
+  print("regions = " + _regions.length+"\n");
+  for(int i=0;i<_regions.length;i++){
+    //Create path tree
+    createConnectRegion(_rootRegion, _regions[i].getLUPointX(), _regions[i].getLUPointY(), State);
+  }
+}
+
+//------------------------------------------------------------------------------------------
+RegionMapInformation[] getStateRegions(RegionMapInformation _rootReegion, int _state){ 
+  // Find Emity Region
+  RegionMapInformation[] tempRegions = new RegionMapInformation[1024];
+  int regionsNumber = getStateRegions(_rootReegion, tempRegions, _state, 0);
+  
+  RegionMapInformation[] resultRegions = new RegionMapInformation[regionsNumber];
+  for(int i=0;i<regionsNumber;i++){
+    resultRegions[i] = tempRegions[i];
+  }
+  
+  return resultRegions;
+}

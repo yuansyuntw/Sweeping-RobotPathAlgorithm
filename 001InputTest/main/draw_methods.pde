@@ -345,3 +345,40 @@ void drawQuadtreeState(PImage _image, RegionMapInformation _quadtree, color _emi
     }//end if
   }//end if
 }//end drawQUadtreeState
+
+//------------------------------------------------------------------------------------------
+void drawConnectRegion(RegionMapInformation _region, int _state, color _selectColor, color _connectColor){
+  
+  if(_region == null) return;
+  
+  //It is not want region state.
+  if(_region.getRegionState() !=_state) return;
+  
+  color mixColor = color(255,0,0);
+  color fullColor = color(0,255,0);
+  
+  ConnectionInformation[] connectRegions = _region.getConnectionRegions();
+  if((connectRegions != null) &&(connectRegions.length>0)){
+    //print("connect regions number = "+connectRegions.length+"\n");
+    for(int i=0;i<connectRegions.length;i++){
+      if(connectRegions[i]!=null){
+        drawQuadtreeCuttingArea(outputImage, connectRegions[i].getConnectRegion(), _connectColor, mixColor, fullColor);
+      }
+    }
+  }//end if
+  
+  drawQuadtreeCuttingArea(outputImage, _region, _selectColor, mixColor, fullColor);
+}
+
+//------------------------------------------------------------------------------------------
+void drawConnectRegions(RegionMapInformation[] _regions, color _selectColor, color _connectColor){
+  
+  if(_regions.length<=0) return;
+  
+  int state = _regions[0].getRegionState();
+  
+  print("regions = " + _regions.length+"\n");
+  for(int i=0;i<_regions.length;i++){
+    drawConnectRegion(_regions[i], state,_selectColor, _connectColor);
+  }
+}
