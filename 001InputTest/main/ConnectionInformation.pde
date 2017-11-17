@@ -45,7 +45,7 @@ RegionMapInformation createConnectRegion(RegionMapInformation _map, int _startX,
   for(int i=0;i<selectRegion.getRegionWidth();i++){
     findTopRegion = findRegionPoint(_map, selectX+i,selectY-1);
     //print("find point = ("+(selectX+i)+","+(selectY-1)+") = "+ findTopRegion+"\n");
-    findDownRegion = findRegionPoint(_map, selectX+i, selectY + selectRegion.getRegionHeight()+1);
+    findDownRegion = findRegionPoint(_map, selectX+i, selectY + selectRegion.getRegionHeight());
     //print("find point = ("+(selectX+i)+","+(selectY + selectRegion.getRegionHeight()+1)+") = "+ findDownRegion+"\n");
     
     if((findTopRegion != null)&&(findTopRegion.getRegionState() == _state)){

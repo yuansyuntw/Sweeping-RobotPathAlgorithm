@@ -24,6 +24,7 @@ RegionMapInformation _rootQuadtree;
 boolean[] map;
 int cutWidth;
 int cutHeight;
+List<ConnectionInformation> WEIGHTS;
 
 //------------------------------------------------------------------------------------------
 void setup(){
@@ -42,11 +43,11 @@ void setup(){
   float[] gridArray = getImageGridArray(inputImage, CUT_SIZE, PATH_COLOR);
   cutWidth = getImageGridWidth(inputImage, CUT_SIZE);
   cutHeight = getImageGridHeight(inputImage, CUT_SIZE);
-  println("cutWidth = " + cutWidth + " cutHeight = " + cutHeight + ", arraySize = " + (cutWidth + (cutWidth * cutHeight)) + "\n");
+  println("Grid Width = " + cutWidth + " Grid Height = " + cutHeight + ", Grid Size = " + (cutWidth + (cutWidth * cutHeight)) + "\n");
   
   //QuadTree cutting
   _rootQuadtree = quadtreeCutting(inputImage, gridArray, 1, -cutWidth/2, -cutHeight/2, cutWidth/2, cutHeight/2, cutWidth, cutHeight);
-  print("Quadtree Cutting End\n\n");
+  print("Quadtree Cutting End ("+_rootQuadtree+").\n");
   
   
   
@@ -121,18 +122,16 @@ void setup(){
   drawConnectRegions(emityRegions, selectRegionColor, connectRegionColor);
   */
   
-  getPrimSpinningTree(_rootQuadtree, 0, 0);
-  
+  WEIGHTS = GetPrimSpinningTree(_rootQuadtree, 3, -25);
   
   //cutGridShow(outputImage, CUT_SIZE, color(25));
-  //outputImage.save(dataPath("quadtree_map_032.png"));
+  //outputImage.save(dataPath("quadtree_map_033.png"));
+  
+  Draw();
 }//end setup
-
 
 //------------------------------------------------------------------------------------------
 void draw(){
-  image(outputImage, 0, 0);
-  
 }
 
 //------------------------------------------------------------------------------------------
@@ -163,6 +162,7 @@ void mousePressed(){
     drawConnectRegion(findIt, RegionMapInformation.RegionState.EMITY_OBSTACLE, selectColor, connectColor);
   }
   
+  Draw();
 }
 
 /*------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ void mousePressed(){
   Return:
     void
 */
-void getPrimSpinningTree(RegionMapInformation _root, int _rootX, int _rootY){
+List<ConnectionInformation> GetPrimSpinningTree(RegionMapInformation _root, int _rootX, int _rootY){
   
   List<RegionMapInformation> vieweds = new ArrayList<RegionMapInformation>();
   
@@ -188,19 +188,17 @@ void getPrimSpinningTree(RegionMapInformation _root, int _rootX, int _rootY){
   while(true){
     if(findIt!=null){
       vieweds.add(findIt);
+      //TextQuadtreeArea(findIt, str(vieweds.size()+1), color(255,0,0), 12);
       AddConnectInformations(weights, findIt);
-      findIt = getMinWeightRegion(vieweds, weights);
+      findIt = GetMinWeightRegion(vieweds, weights);
     }else{
       break;
     }
   }
   
-  print("getPrimSpinninggtree() complete.\n");
-  for(int i=0;i<weights.size();i++){
-    print("O = " + weights.get(i).getOriginalRegion() + ", C = " + weights.get(i).getConnectRegion()+"\n");
-  }
+  print("getPrimSpinningTree() is complete. Find " + weights.size() + " paths.\n");
 
-  return ;
+  return weights;
 }
 
 //------------------------------------------------------------------------------------------
@@ -211,7 +209,7 @@ void getPrimSpinningTree(RegionMapInformation _root, int _rootX, int _rootY){
   Parameter:
     _weightsArray = Attached array.
     _index = Attached array index.
-    _region =   Join the content.
+    _region = Join the content.
     
   Return:
     New attached array index. 
@@ -219,12 +217,17 @@ void getPrimSpinningTree(RegionMapInformation _root, int _rootX, int _rootY){
 void AddConnectInformations(List<ConnectionInformation> _weights, RegionMapInformation _region){
   
   //Check input data
-  if((_region != null)&&(_weights!=null)){
-    print("region addres = " + _region+"\n");
-    print("weights address = " + _weights.size()+"\n");
-    print("region connect region = " + _region.getConnectionRegions()+"\n");
+  if((_region != null)&&(_region.getConnectionRegions()!=null)&&(_weights!=null)){
+    //print("region addres = " + _region+"\n");
+    //print("weights address = " + _weights.size()+"\n");
+    //print("region connect region = " + _region.getConnectionRegions()+"\n");
+    
+    ConnectionInformation ci;
     for(int i=0;i<_region.getConnectionRegions().length;i++){
-      _weights.add(_region.getConnectionRegions()[i]);
+      ci = _region.getConnectionRegions()[i];
+      if(ci!=null){
+          _weights.add(ci);
+      }
     }
   }
   
@@ -240,28 +243,39 @@ void AddConnectInformations(List<ConnectionInformation> _weights, RegionMapInfor
   Return:
     min region weight.
 */
-RegionMapInformation getMinWeightRegion(List<RegionMapInformation> _vieweds, List<ConnectionInformation> _weights){
+RegionMapInformation GetMinWeightRegion(List<RegionMapInformation> _vieweds, List<ConnectionInformation> _weights){
   RegionMapInformation result = null;
 
   if(_weights.size()>0){
+    //print("weights size = " + _weights.size() + "\n");
     
     //Find min weights,
+    int oldMinWeight = 0;
     int minWeight = _weights.get(0).getWeight();
     int minWeightIndex = 0;
     while(true){
     
       for(int i=0;i<_weights.size();i++){
-        if(_weights.get(i).getWeight() < minWeight){
+        //print("_weight["+i+"] = " + _weights.get(i) + "\n");
+        if((oldMinWeight < _weights.get(i).getWeight()) && (_weights.get(i).getWeight() < minWeight)){
           minWeightIndex = i;
           minWeight = _weights.get(i).getWeight();
         }
       }//end for
+      
+      if(minWeight==oldMinWeight){
+          break;
+      }
+      
+      //print("find minWeight = " + minWeight);
     
       //Check add it, wether will cause loop.
-      if(checkCycle(_vieweds, _weights.get(minWeightIndex).getConnectRegion())){
+      if(CheckCycle(_vieweds, _weights.get(minWeightIndex).getConnectRegion())){
         
         //Refind.
-        minWeight=_weights.get(minWeightIndex).getWeight();
+        oldMinWeight = minWeight;
+        minWeight = 9999;
+        //print(" Refind\n");
         
       }else{
         
@@ -271,6 +285,7 @@ RegionMapInformation getMinWeightRegion(List<RegionMapInformation> _vieweds, Lis
         
       }//end if
       
+      //print(".");
     }//end while
   }//end if
   
@@ -288,13 +303,84 @@ RegionMapInformation getMinWeightRegion(List<RegionMapInformation> _vieweds, Lis
   Return:
     Whether to create a loop.
 */
-boolean checkCycle(List<RegionMapInformation> _vieweds, RegionMapInformation _region){
+boolean CheckCycle(List<RegionMapInformation> _vieweds, RegionMapInformation _region){
   boolean result = true;
   
-  if((_region!=null)&&(_vieweds.indexOf(_region)!=-1)){
-    
+  //print(" check region = "+_region+"");
+  //print(" in " + _vieweds.indexOf(_region) + "\n");
+  if((_region!=null)&&(_vieweds.indexOf(_region)==-1)){
     result = false;
   }
   
   return result;
+}
+
+/*------------------------------------------------------------------------------------------
+  Purpose:
+    Help to debug. Add text to screen.
+    
+  Parameter:
+    _region = draw with region.
+    _str = Added string.
+    _col = Text color.
+    _textSize = Text size. 
+    
+  Return:
+    None.
+*/
+void TextQuadtreeArea(RegionMapInformation _region, String _str, color _col, int _textSize){
+  
+  if(_region!=null){
+      int x = (_region.getLUPointX()+cutWidth/2)*CUT_SIZE; 
+      int y = (_region.getLUPointY()+cutHeight/2)*CUT_SIZE;
+      //print("text pos = ("+x+","+y+")\n");
+      
+      //background(0);
+      fill(_col);
+      textSize(_textSize);
+      text(_str, x, y);
+  }
+}
+
+/*------------------------------------------------------------------------------------------
+  Purpose:
+    Help to debug. Draw connectionInformationNumber.
+    
+  Parameter:
+    _weights = draw with region.
+    _str = Added string.
+    _col = Text color.
+    _textSize = Text size. 
+    
+  Return:
+    None.
+*/
+void DrawConnectionInformation(List<ConnectionInformation> _weights, color _col){
+    
+  if(_weights!=null){
+    color mixColor = color(150);
+    color fullColor = color(200);
+  
+    for(int i=0;i<_weights.size();i++){
+      //print("O = " + _weights.get(i).getOriginalRegion() + ", C = " + _weights.get(i).getConnectRegion()+"\n");
+      drawQuadtreeCuttingArea(outputImage, _weights.get(i).getConnectRegion(), int(_col-50), mixColor, fullColor);
+      drawQuadtreeCuttingArea(outputImage, _weights.get(i).getOriginalRegion(), _col, mixColor, fullColor);
+    }
+  }
+  
+}
+
+/*------------------------------------------------------------------------------------------
+  Purpose:
+    Draw GUI.
+    
+  Parameter:
+    None.
+    
+  Return:
+    None.
+*/
+void Draw(){
+  image(outputImage, 0, 0);
+  DrawConnectionInformation(WEIGHTS, color(150));
 }

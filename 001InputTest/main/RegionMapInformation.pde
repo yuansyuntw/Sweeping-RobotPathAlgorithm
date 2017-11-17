@@ -236,42 +236,49 @@ RegionMapInformation getRegionInformation(float[] _mapArray, int _gridWidth, int
 
 //------------------------------------------------------------------------------------------
 RegionMapInformation findRegionPoint(RegionMapInformation _quadTree, int _pointX, int _pointY){
+  RegionMapInformation result = null;
+    
   if(_quadTree != null){
     
-    if(inRegion(_quadTree, _pointX, _pointY)){
+    while(inRegion(_quadTree, _pointX, _pointY)){
          
          if(_quadTree.isLeaf()){
-           return _quadTree;
+           result = _quadTree;
+           break;
          }else{
            if(inRegion(_quadTree.getLURegion(), _pointX, _pointY)){
-             return findRegionPoint(_quadTree.getLURegion(), _pointX, _pointY);
+             result = findRegionPoint(_quadTree.getLURegion(), _pointX, _pointY);
+             break;
            }
            
            if(inRegion(_quadTree.getRURegion(), _pointX, _pointY)){
-             return findRegionPoint(_quadTree.getRURegion(), _pointX, _pointY);
+             result = findRegionPoint(_quadTree.getRURegion(), _pointX, _pointY);
+             break;
            }
            
            if(inRegion(_quadTree.getLDRegion(), _pointX, _pointY)){
-             return findRegionPoint(_quadTree.getLDRegion(), _pointX, _pointY);
+             result = findRegionPoint(_quadTree.getLDRegion(), _pointX, _pointY);
+             break;
            }
            
            if(inRegion(_quadTree.getRDRegion(), _pointX, _pointY)){
-             return findRegionPoint(_quadTree.getRDRegion(), _pointX, _pointY);
-           }
-           
-           return null;
-         }
-    }//end if
+             result = findRegionPoint(_quadTree.getRDRegion(), _pointX, _pointY);
+             break;
+           } 
+         }//end if
+         
+         break;
+    }//end while
   }//end if
   
-  return null;
+  return result;
 }//end findRegionPoint
 
 //------------------------------------------------------------------------------------------
 boolean inRegion(RegionMapInformation _region, int _pointX, int _pointY){
-  if(_pointX >= _region.getLUPointX() && _pointX <= _region.getRDPointX() &&
-     _pointY >= _region.getLUPointY() && _pointY <= _region.getRDPointY()){
-     return true;  
+  if(_region.getLUPointX() <= _pointX  && _pointX <= _region.getRDPointX() &&
+      _region.getLUPointY() <= _pointY && _pointY <= _region.getRDPointY()){
+     return true;
   }
    
   return false;
@@ -336,7 +343,7 @@ void connectRegions(RegionMapInformation _rootRegion, RegionMapInformation[] _re
   //connect same state.
   int State = _regions[0].getRegionState();
   
-  print("regions = " + _regions.length+"\n");
+  //print("regions = " + _regions.length+"\n");
   for(int i=0;i<_regions.length;i++){
     //Create path tree
     createConnectRegion(_rootRegion, _regions[i].getLUPointX(), _regions[i].getLUPointY(), State);
